@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pesquisar Reddit</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-5">
+    <h1>Pesquisar subreddit</h1>
+    <form action="{{ url_for('search') }}" method="get" class="row g-3">
+      <div class="col-md-4">
+        <label for="subreddit" class="form-label">Subreddit</label>
+        <input type="text" id="subreddit" name="subreddit" class="form-control" placeholder="ex: python" value="{{ subreddit or '' }}" required>
+      </div>
+      <div class="col-md-4">
+        <label for="sort" class="form-label">Ordenar por</label>
+        <select id="sort" name="sort" class="form-select">
+          <option value="hot" {% if sort=='hot' %}selected{% endif %}>Hot</option>
+          <option value="new" {% if sort=='new' %}selected{% endif %}>New</option>
+          <option value="top" {% if sort=='top' %}selected{% endif %}>Top</option>
+          <option value="controversial" {% if sort=='controversial' %}selected{% endif %}>Controversial</option>
+          <option value="rising" {% if sort=='rising' %}selected{% endif %}>Rising</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label for="limit" class="form-label">Número de posts</label>
+        <input type="number" id="limit" name="limit" class="form-control" value="{{ limit or 10 }}" min="1">
+      </div>
+      <div class="col-md-2 align-self-end">
+        <button type="submit" class="btn btn-primary w-100">Pesquisar</button>
+      </div>
+    </form>
+
+    {% if posts %}
+      <hr>
+      <h2>Resultados para /r/{{ subreddit }}</h2>
+      <div class="list-group">
+        {% for post in posts %}
+        <a href="{{ post.url }}" target="_blank" class="list-group-item list-group-item-action">
+          <h5 class="mb-1">{{ post.title }}</h5>
+          <small class="text-muted">Score: {{ post.score }} | ID: {{ post.id }}</small>
+        </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>
