@@ -1,3 +1,6 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
 name: Build and deploy container app to Azure Web App - reddit-app
 
 on:
@@ -8,36 +11,33 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: 'ubuntu-latest'
 
     steps:
-    - name: Checkout do código
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v2
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
-    - name: Log in to Docker Hub
+    - name: Log in to registry
       uses: docker/login-action@v2
       with:
-        registry: docker.io
-        username: ${{ secrets.AzureAppService_ContainerUsername_9367937863d8449b874fda7589168b5d }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_ae1e8f1b241148009cbaa9b9e8e31d1f }}
+        registry: https://index.docker.io/v1/
+        username: ${{ secrets.AzureAppService_ContainerUsername_c958a90421e64b62a5f8c0f856757903 }}
+        password: ${{ secrets.AzureAppService_ContainerPassword_d277577e4e304704aa6dc99473f16cdb }}
 
     - name: Build and push container image to registry
       uses: docker/build-push-action@v3
       with:
-        context: ./web-app
-        file: ./web-app/Dockerfile
         push: true
-        tags: |
-          ${{ secrets.AzureAppService_ContainerUsername_9367937863d8449b874fda7589168b5d }}/minha-app-reddit:${{ github.sha }}
+        tags: index.docker.io/${{ secrets.AzureAppService_ContainerUsername_c958a90421e64b62a5f8c0f856757903 }}/rodrig0salv/minha-app:${{ github.sha }}
+        file: ./Dockerfile
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     environment:
-      name: production
+      name: 'production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
@@ -45,8 +45,7 @@ jobs:
       id: deploy-to-webapp
       uses: azure/webapps-deploy@v2
       with:
-        app-name: reddit-app
-        slot-name: production
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_e0ac9c24ed9d49e788a90a2ea61a8596 }}
-        images: |
-          ${{ secrets.AzureAppService_ContainerUsername_9367937863d8449b874fda7589168b5d }}/minha-app-reddit:${{ github.sha }}
+        app-name: 'reddit-app'
+        slot-name: 'production'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_eaccb369d4894358bc5d73653c43abff }}
+        images: 'index.docker.io/${{ secrets.AzureAppService_ContainerUsername_c958a90421e64b62a5f8c0f856757903 }}/rodrig0salv/minha-app:${{ github.sha }}'
