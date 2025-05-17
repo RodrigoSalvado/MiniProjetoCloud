@@ -31,7 +31,7 @@ jobs:
       with:
         push: true
         tags: index.docker.io/${{ secrets.AzureAppService_ContainerUsername_05f08b3d5d3a42788f364682eb18570a }}/rodrig0salv/minha-app:${{ github.sha }}
-        file: ./Dockerfile
+        file: ./web-app/Dockerfile
 
   deploy:
     runs-on: ubuntu-latest
