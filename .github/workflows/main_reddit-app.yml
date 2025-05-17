@@ -31,7 +31,7 @@ jobs:
       with:
         push: true
         tags: index.docker.io/${{ secrets.AzureAppService_ContainerUsername_bc3746f65cb84fe78ad4de2a10b00f20 }}/rodrigosalvado/minha-app-reddit:${{ github.sha }}
-        file: ./Dockerfile
+        file: ./web-app/Dockerfile
 
   deploy:
     runs-on: ubuntu-latest
