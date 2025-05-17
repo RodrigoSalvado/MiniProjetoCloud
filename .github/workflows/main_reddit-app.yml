@@ -21,17 +21,17 @@ jobs:
       uses: docker/login-action@v2
       with:
         registry: docker.io
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        username: ${{ secrets.AzureAppService_ContainerUsername_9367937863d8449b874fda7589168b5d }}
+        password: ${{ secrets.AzureAppService_ContainerPassword_ae1e8f1b241148009cbaa9b9e8e31d1f }}
 
-    - name: Build and push container image to Docker Hub
+    - name: Build and push container image to registry
       uses: docker/build-push-action@v3
       with:
         context: ./web-app
         file: ./web-app/Dockerfile
         push: true
         tags: |
-          ${{ secrets.DOCKERHUB_USERNAME }}/minha-app-reddit:${{ github.sha }}
+          ${{ secrets.AzureAppService_ContainerUsername_9367937863d8449b874fda7589168b5d }}/minha-app-reddit:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -49,4 +49,4 @@ jobs:
         slot-name: production
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_e0ac9c24ed9d49e788a90a2ea61a8596 }}
         images: |
-          ${{ secrets.DOCKERHUB_USERNAME }}/minha-app-reddit:${{ github.sha }}
+          ${{ secrets.AzureAppService_ContainerUsername_9367937863d8449b874fda7589168b5d }}/minha-app-reddit:${{ github.sha }}
