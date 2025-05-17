@@ -28,7 +28,7 @@ jobs:
           file: ./web-app/Dockerfile                 # caminho para o Dockerfile
           push: true
           tags: |
-            ${{ secrets.AzureAppService_ContainerUsername_05f08b3d5d3a42788f364682eb18570a }}/minha-app:${{ github.sha }}
+            rodrig0salv/minha-app:latest
           # (opcional) para reforçar o registry:
           # tags: |
           #   index.docker.io/${{ secrets.AzureAppService_ContainerUsername_05f08b3d5d3a42788f364682eb18570a }}/minha-app:${{ github.sha }}
@@ -49,4 +49,4 @@ jobs:
           slot-name: production
           publish-profile: ${{ secrets.AzureAppService_PublishProfile_59513a348e4a48a5998c742cc5a34bc8 }}
           images: |
-            ${{ secrets.AzureAppService_ContainerUsername_05f08b3d5d3a42788f364682eb18570a }}/minha-app:${{ github.sha }}
+            rodrig0salv/minha-app:latest
