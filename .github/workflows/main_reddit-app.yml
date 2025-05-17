@@ -23,14 +23,14 @@ jobs:
       uses: docker/login-action@v2
       with:
         registry: https://index.docker.io/v1/
-        username: ${{ secrets.AzureAppService_ContainerUsername_c958a90421e64b62a5f8c0f856757903 }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_d277577e4e304704aa6dc99473f16cdb }}
+        username: ${{ secrets.AzureAppService_ContainerUsername_05f08b3d5d3a42788f364682eb18570a }}
+        password: ${{ secrets.AzureAppService_ContainerPassword_3c476478ad3749adbf692ba277661c71 }}
 
     - name: Build and push container image to registry
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: index.docker.io/${{ secrets.AzureAppService_ContainerUsername_c958a90421e64b62a5f8c0f856757903 }}/rodrig0salv/minha-app:${{ github.sha }}
+        tags: index.docker.io/${{ secrets.AzureAppService_ContainerUsername_05f08b3d5d3a42788f364682eb18570a }}/rodrig0salv/minha-app:${{ github.sha }}
         file: ./Dockerfile
 
   deploy:
@@ -47,5 +47,5 @@ jobs:
       with:
         app-name: 'reddit-app'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_eaccb369d4894358bc5d73653c43abff }}
-        images: 'index.docker.io/${{ secrets.AzureAppService_ContainerUsername_c958a90421e64b62a5f8c0f856757903 }}/rodrig0salv/minha-app:${{ github.sha }}'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_59513a348e4a48a5998c742cc5a34bc8 }}
+        images: 'index.docker.io/${{ secrets.AzureAppService_ContainerUsername_05f08b3d5d3a42788f364682eb18570a }}/rodrig0salv/minha-app:${{ github.sha }}'
