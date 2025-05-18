@@ -25,22 +25,24 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Create and start virtual environment
+      - name: Create and activate virtual environment
         run: |
           python -m venv venv
           source venv/bin/activate
 
       - name: Install dependencies
-        run: pip install -r ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/requirements.txt
+        run: |
+          source venv/bin/activate
+          pip install -r ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/requirements.txt
 
       # Optional: Add step to run tests here
 
-      - name: Zip artifact for deployment
+      - name: Zip ‘redditIngestFunc’ for deployment
         run: |
           cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           zip -r ../release.zip .
 
-      - name: Upload artifact for deployment job
+      - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
           name: python-app
@@ -59,22 +61,20 @@ jobs:
         with:
           name: python-app
 
-      - name: Unzip artifact for deployment
-        run: unzip release.zip
+      - name: Unzip artifact into Function folder
+        run: unzip release.zip -d ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
 
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_93A396B303A94D06A0CDEEB67B24F2D2 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_C849859B1BAE4B3F93469829711E7E97 }}
+          client-id:       ${{ secrets.AZUREAPPSERVICE_CLIENTID_93A396B303A94D06A0CDEEB67B24F2D2 }}
+          tenant-id:       ${{ secrets.AZUREAPPSERVICE_TENANTID_C849859B1BAE4B3F93469829711E7E97 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_4380EE91EB5A46A9B09012D0096803DE }}
 
       - name: Install Azure Functions Core Tools
         run: npm install -g azure-functions-core-tools@4 --unsafe-perm true
 
       - name: Publish to Azure Function via CLI
-        env:
-          AZURE_FUNCTIONAPP_PACKAGE_PATH: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
         run: |
-          cd $AZURE_FUNCTIONAPP_PACKAGE_PATH
+          cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           func azure functionapp publish miniprojetoappfunction --python --force
