@@ -1,12 +1,13 @@
-# SearchFunction/__init__.py
-
 import os
 import logging
 import json
 import requests
 from requests.auth import HTTPBasicAuth
 import azure.functions as func
-from azure.cosmos import CosmosClient, exceptions
+from azure.cosmos import CosmosClient
+
+# Import das funções de tradução de outro módulo
+from translator import detect_language, translate_to_english
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -23,6 +24,11 @@ CLIENT_SECRET = (
 REDDIT_USER = os.environ.get("REDDIT_USER")
 REDDIT_PASSWORD = os.environ.get("REDDIT_PASSWORD")
 
+# --- Azure Translator Config (não usado aqui, mas obrigatórias no módulo translation) ---
+TRANSLATOR_KEY = os.environ.get("TRANSLATOR_KEY")
+TRANSLATOR_ENDPOINT = os.environ.get("TRANSLATOR_ENDPOINT")
+TRANSLATOR_REGION = os.environ.get("TRANSLATOR_REGION", "francecentral")
+
 # --- Cosmos DB ---
 COSMOS_ENDPOINT = os.environ.get("COSMOS_ENDPOINT")
 COSMOS_KEY      = os.environ.get("COSMOS_KEY")
@@ -36,6 +42,7 @@ logger.info(f"Credenciais Reddit: CLIENT_ID={'OK' if CLIENT_ID else 'MISSING'}, 
             f"REDDIT_PASSWORD={'OK' if REDDIT_PASSWORD else 'MISSING'}")
 logger.info(f"Cosmos DB: ENDPOINT={'OK' if COSMOS_ENDPOINT else 'MISSING'}, "
             f"KEY={'OK' if COSMOS_KEY else 'MISSING'}")
+logger.info(f"Translator Module: IMPORT OK (funções em translation.py)")
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
@@ -58,7 +65,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     sort = req.params.get("sort", "hot")
 
-    # Verifica se as credenciais estão realmente presentes
     if not all([CLIENT_ID, CLIENT_SECRET, REDDIT_USER, REDDIT_PASSWORD]):
         missing = [k for k,v in {
             "CLIENT_ID":CLIENT_ID, "CLIENT_SECRET":CLIENT_SECRET,
@@ -80,24 +86,23 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             status_code=500, mimetype="application/json"
         )
 
-    # Garante que só enviamos tipos serializáveis (dicionários simples)
     sanitized = []
     for p in posts:
         sanitized.append({
             "id": p.get("id"),
             "subreddit": p.get("subreddit"),
             "title": p.get("title"),
+            "title_eng": p.get("title_eng"),
             "url": p.get("url"),
             "score": p.get("score")
         })
 
-    # Retorna um JSON puro com a lista de posts
     body = json.dumps({"posts": sanitized}, ensure_ascii=False)
     return func.HttpResponse(body, status_code=200, mimetype="application/json")
 
 
 def _fetch_and_store(subreddit: str, sort: str, limit: int):
-    # --- Autenticação OAuth2 no Reddit ---
+    # Autenticação OAuth2 no Reddit
     auth = HTTPBasicAuth(CLIENT_ID, CLIENT_SECRET)
     token_res = requests.post(
         "https://www.reddit.com/api/v1/access_token",
@@ -114,7 +119,7 @@ def _fetch_and_store(subreddit: str, sort: str, limit: int):
     if not token:
         raise RuntimeError("Não obteve access_token do Reddit.")
 
-    # --- Fetch de posts ---
+    # Fetch de posts
     res = requests.get(
         f"https://oauth.reddit.com/r/{subreddit}/{sort}",
         headers={
@@ -128,22 +133,6 @@ def _fetch_and_store(subreddit: str, sort: str, limit: int):
     if not isinstance(children, list):
         raise RuntimeError("Resposta inesperada da API do Reddit.")
 
-    # --- Monta documentos para Cosmos ---
-    posts = []
-    for c in children:
-        d = c.get("data", {})
-        rid = d.get("id")
-        if not rid:
-            continue
-        posts.append({
-            "id":        f"{subreddit}_{rid}",
-            "subreddit": subreddit,
-            "title":     d.get("title", ""),
-            "url":       d.get("url", ""),
-            "score":     d.get("score", 0)
-        })
-
-    # --- Upsert no Cosmos DB ---
     client = CosmosClient(COSMOS_ENDPOINT, COSMOS_KEY)
     db     = client.create_database_if_not_exists(COSMOS_DATABASE)
     cont   = db.create_container_if_not_exists(
@@ -151,8 +140,27 @@ def _fetch_and_store(subreddit: str, sort: str, limit: int):
         partition_key={"path": "/subreddit"}
     )
 
-    for p in posts:
-        cont.upsert_item(p)
-        logger.info(f"Upserted item: {p['id']}")
+    posts = []
+    for c in children:
+        d = c.get("data", {})
+        rid = d.get("id")
+        if not rid:
+            continue
+        title = d.get("title", "")
+        # 1) Detecta idioma e traduz via módulo importado
+        lang = detect_language(title)
+        title_eng = translate_to_english(title, from_lang=lang)
+
+        item = {
+            "id":        f"{subreddit}_{rid}",
+            "subreddit": subreddit,
+            "title":     title,
+            "title_eng": title_eng,
+            "url":       d.get("url", ""),
+            "score":     d.get("score", 0)
+        }
+        cont.upsert_item(item)
+        logger.info(f"Upserted item: {item['id']}")
+        posts.append(item)
 
     return posts

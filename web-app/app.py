@@ -13,6 +13,7 @@ def home():
 @app.route("/search", methods=["GET"])
 def search():
     subreddit = request.args.get("subreddit", "").strip()
+    sort = request.args.get("sort", "hot").strip()
     limit_str = request.args.get("limit", "10")
     try:
         limit = int(limit_str)
@@ -24,7 +25,7 @@ def search():
     try:
         resp = requests.get(
             FUNCTION_URL,
-            params={"subreddit": subreddit, "limit": limit},
+            params={"subreddit": subreddit, "sort": sort, "limit": limit},
             timeout=30
         )
         resp.raise_for_status()
