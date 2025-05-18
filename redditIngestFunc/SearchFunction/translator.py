@@ -1,8 +1,8 @@
-import requests, uuid, json
+import requests, uuid, json, os
 
 #Configuração
-key = "6oSN0D4PkZmLLkiVx7shXgTImGPtJe8nfNriRZgBgSAC3QidKDujJQQJ99BEAC5T7U2XJ3w3AAAbACOG1uk7"
-endpoint = "https://api.cognitive.microsofttranslator.com/"
+key = os.environ.get("TANSLATOR_KEY")
+endpoint = os.environ.get("TRNASLATOR_ENDPOINT")
 location = "francecentral"
 
 #Função para detectar idioma
