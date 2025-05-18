@@ -6,38 +6,71 @@ from requests.auth import HTTPBasicAuth
 import azure.functions as func
 from azure.cosmos import CosmosClient
 
-# Import das funções de tradução de outro módulo (translator.py)
-from translator import detect_language, translate_to_english
+# --- Azure Translator Config ---
+TRANSLATOR_KEY = os.environ.get("TRANSLATOR_KEY")
+TRANSLATOR_ENDPOINT = os.environ.get("TRANSLATOR_ENDPOINT")
+TRANSLATOR_REGION = os.environ.get("TRANSLATOR_REGION", "francecentral")
 
+# --- Funções de Tradução ---
+def detect_language(text: str) -> str:
+    """Detecta o idioma de um texto usando Azure Translator."""
+    path = '/detect'
+    url = TRANSLATOR_ENDPOINT + path
+    params = {'api-version': '3.0'}
+    headers = {
+        'Ocp-Apim-Subscription-Key': TRANSLATOR_KEY,
+        'Ocp-Apim-Subscription-Region': TRANSLATOR_REGION,
+        'Content-Type': 'application/json'
+    }
+    body = [{'text': text}]
+    resp = requests.post(url, params=params, headers=headers, json=body)
+    resp.raise_for_status()
+    return resp.json()[0]['language']
+
+
+def translate_to_english(text: str, from_lang: str = None) -> str:
+    """Traduz texto para inglês usando Azure Translator."""
+    path = '/translate'
+    url = TRANSLATOR_ENDPOINT + path
+    params = {'api-version': '3.0', 'to': ['en']}
+    if from_lang:
+        params['from'] = from_lang
+    headers = {
+        'Ocp-Apim-Subscription-Key': TRANSLATOR_KEY,
+        'Ocp-Apim-Subscription-Region': TRANSLATOR_REGION,
+        'Content-Type': 'application/json'
+    }
+    body = [{'text': text}]
+    resp = requests.post(url, params=params, headers=headers, json=body)
+    resp.raise_for_status()
+    result = resp.json()
+    return result[0]['translations'][0]['text']
+
+# --- Configurações e credenciais ---
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# --- Leitura flexível de credenciais Reddit ---
-CLIENT_ID = (
-    os.environ.get("CLIENT_ID")
-    or os.environ.get("REDDIT_CLIENT_ID")
-)
-CLIENT_SECRET = (
-    os.environ.get("SECRET")
-    or os.environ.get("REDDIT_CLIENT_SECRET")
-)
+# Leitura flexível de credenciais Reddit
+CLIENT_ID = os.environ.get("CLIENT_ID") or os.environ.get("REDDIT_CLIENT_ID")
+CLIENT_SECRET = os.environ.get("SECRET") or os.environ.get("REDDIT_CLIENT_SECRET")
 REDDIT_USER = os.environ.get("REDDIT_USER")
 REDDIT_PASSWORD = os.environ.get("REDDIT_PASSWORD")
 
-# --- Cosmos DB ---
+# Configurações do Cosmos DB
 COSMOS_ENDPOINT = os.environ.get("COSMOS_ENDPOINT")
 COSMOS_KEY      = os.environ.get("COSMOS_KEY")
 COSMOS_DATABASE = os.environ.get("COSMOS_DATABASE", "RedditApp")
 COSMOS_CONTAINER = os.environ.get("COSMOS_CONTAINER", "posts")
 
-# --- Verificação das variáveis ---
+# Log de presença das variáveis
 logger.info(f"Credenciais Reddit: CLIENT_ID={'OK' if CLIENT_ID else 'MISSING'}, "
             f"CLIENT_SECRET={'OK' if CLIENT_SECRET else 'MISSING'}, "
             f"REDDIT_USER={'OK' if REDDIT_USER else 'MISSING'}, "
             f"REDDIT_PASSWORD={'OK' if REDDIT_PASSWORD else 'MISSING'}")
 logger.info(f"Cosmos DB: ENDPOINT={'OK' if COSMOS_ENDPOINT else 'MISSING'}, "
             f"KEY={'OK' if COSMOS_KEY else 'MISSING'}")
-logger.info(f"Translator Module: IMPORT OK (funções em translator.py)")
+logger.info(f"Translator: KEY={'OK' if TRANSLATOR_KEY else 'MISSING'}, "
+            f"ENDPOINT={'OK' if TRANSLATOR_ENDPOINT else 'MISSING'}")
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
@@ -142,7 +175,7 @@ def _fetch_and_store(subreddit: str, sort: str, limit: int):
         if not rid:
             continue
         title = d.get("title", "")
-        # 1) Detecta idioma e traduz via módulo importado
+        # 1) Detecta idioma e traduz
         lang = detect_language(title)
         title_eng = translate_to_english(title, from_lang=lang)
 
