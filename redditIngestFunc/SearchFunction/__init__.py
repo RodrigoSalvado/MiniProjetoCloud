@@ -175,9 +175,12 @@ def _fetch_and_store(subreddit: str, sort: str, limit: int):
         if not rid:
             continue
         title = d.get("title", "")
-        # 1) Detecta idioma e traduz
+        # 1) Detecta idioma e traduz apenas se necessário
         lang = detect_language(title)
-        title_eng = translate_to_english(title, from_lang=lang)
+        if lang.lower().startswith('en'):
+            title_eng = title
+        else:
+            title_eng = translate_to_english(title, from_lang=lang)
 
         item = {
             "id":        f"{subreddit}_{rid}",
