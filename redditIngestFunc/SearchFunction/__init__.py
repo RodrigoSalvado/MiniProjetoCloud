@@ -6,7 +6,7 @@ from requests.auth import HTTPBasicAuth
 import azure.functions as func
 from azure.cosmos import CosmosClient
 
-# Import das funções de tradução de outro módulo
+# Import das funções de tradução de outro módulo (translator.py)
 from translator import detect_language, translate_to_english
 
 logging.basicConfig(level=logging.INFO)
@@ -24,25 +24,20 @@ CLIENT_SECRET = (
 REDDIT_USER = os.environ.get("REDDIT_USER")
 REDDIT_PASSWORD = os.environ.get("REDDIT_PASSWORD")
 
-# --- Azure Translator Config (não usado aqui, mas obrigatórias no módulo translation) ---
-TRANSLATOR_KEY = os.environ.get("TRANSLATOR_KEY")
-TRANSLATOR_ENDPOINT = os.environ.get("TRANSLATOR_ENDPOINT")
-TRANSLATOR_REGION = os.environ.get("TRANSLATOR_REGION", "francecentral")
-
 # --- Cosmos DB ---
 COSMOS_ENDPOINT = os.environ.get("COSMOS_ENDPOINT")
 COSMOS_KEY      = os.environ.get("COSMOS_KEY")
 COSMOS_DATABASE = os.environ.get("COSMOS_DATABASE", "RedditApp")
 COSMOS_CONTAINER = os.environ.get("COSMOS_CONTAINER", "posts")
 
-# --- Log de presença das variáveis (sem vazar dados) ---
+# --- Verificação das variáveis ---
 logger.info(f"Credenciais Reddit: CLIENT_ID={'OK' if CLIENT_ID else 'MISSING'}, "
             f"CLIENT_SECRET={'OK' if CLIENT_SECRET else 'MISSING'}, "
             f"REDDIT_USER={'OK' if REDDIT_USER else 'MISSING'}, "
             f"REDDIT_PASSWORD={'OK' if REDDIT_PASSWORD else 'MISSING'}")
 logger.info(f"Cosmos DB: ENDPOINT={'OK' if COSMOS_ENDPOINT else 'MISSING'}, "
             f"KEY={'OK' if COSMOS_KEY else 'MISSING'}")
-logger.info(f"Translator Module: IMPORT OK (funções em translation.py)")
+logger.info(f"Translator Module: IMPORT OK (funções em translator.py)")
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
