@@ -4,6 +4,15 @@
 
 azure-functions
 azure-cosmos>=4.0.0
+azure-storage-blob
 requests
 python-dotenv
-
+ipywidgets
+matplotlib
+seaborn
+nltk
+transformers
+spicy
+torch
+textblob
+wordcloud
