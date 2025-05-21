@@ -11,7 +11,7 @@ TRANSLATOR_KEY = os.environ.get("TRANSLATOR_KEY")
 TRANSLATOR_ENDPOINT = os.environ.get("TRANSLATOR_ENDPOINT")
 TRANSLATOR_REGION = os.environ.get("TRANSLATOR_REGION", "francecentral")
 
-# --- Funções do Translator ---
+# --- Funções de Tradução ---
 def detect_language(text: str) -> str:
     """Detecta o idioma de um texto usando Azure Translator."""
     path = '/detect'
@@ -50,7 +50,7 @@ def translate_to_english(text: str, from_lang: str = None) -> str:
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Credenciais Reddit
+# Leitura flexível de credenciais Reddit
 CLIENT_ID = os.environ.get("CLIENT_ID") or os.environ.get("REDDIT_CLIENT_ID")
 CLIENT_SECRET = os.environ.get("SECRET") or os.environ.get("REDDIT_CLIENT_SECRET")
 REDDIT_USER = os.environ.get("REDDIT_USER")
