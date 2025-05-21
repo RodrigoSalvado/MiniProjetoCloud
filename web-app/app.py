@@ -21,7 +21,6 @@ def search():
         flash("O campo 'Número de posts' deve ser um número inteiro.", "warning")
         return redirect(url_for("home"))
 
-    # Chama a Azure Function server-side
     try:
         resp = requests.get(
             FUNCTION_URL,
