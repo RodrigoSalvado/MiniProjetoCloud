@@ -67,9 +67,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id:       ${{ secrets.AZUREAPPSERVICE_CLIENTID_93A396B303A94D06A0CDEEB67B24F2D2 }}
-          tenant-id:       ${{ secrets.AZUREAPPSERVICE_TENANTID_C849859B1BAE4B3F93469829711E7E97 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_4380EE91EB5A46A9B09012D0096803DE }}
+          client-id:       ${{ secrets.AZUREAPPSERVICE_CLIENTID_FFFE2059A0324B3FB5DFAA7C16CB2944 }}
+          tenant-id:       ${{ secrets.AZUREAPPSERVICE_TENANTID_EB2C89CE4FA7491EB00D45DA3C4E7B8C }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_F2FDBFC51FAD456FA93CDAAB4BCBF58B }}
 
       - name: Install Azure Functions Core Tools
         run: npm install -g azure-functions-core-tools@4 --unsafe-perm true
