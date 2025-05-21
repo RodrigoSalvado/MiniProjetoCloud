@@ -1,46 +1,41 @@
-import os
 from flask import Flask, render_template, request, flash, redirect, url_for
-import requests
+import os, requests
 
 app = Flask(__name__)
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev_key")
-
-FUNCTION_URL = os.getenv("FUNCTION_URL", "https://sua-azure-function.azurewebsites.net/api/GetPosts")
-
-def fetch_posts(subreddit, sort, limit):
-    """Chama a Azure Function e retorna lista de posts ou None em caso de erro."""
-    try:
-        resp = requests.get(FUNCTION_URL, params={
-            "subreddit": subreddit,
-            "sort": sort,
-            "limit": limit
-        })
-        resp.raise_for_status()
-        return resp.json()  # espera uma lista de dicts
-    except Exception as e:
-        flash(f"Erro ao obter posts: {e}", "danger")
-        return None
+app.secret_key = os.getenv("FLASK_SECRET_KEY")
+FUNCTION_URL = os.getenv("FUNCTION_URL")
 
 @app.route("/", methods=["GET"])
-def index():
-    return render_template("index.html")
+def home():
+    # apenas renderiza o formulário; posts são passados pela rota search
+    return render_template("index.html", posts=None)
 
 @app.route("/search", methods=["GET"])
 def search():
     subreddit = request.args.get("subreddit", "").strip()
-    sort = request.args.get("sort", "hot")
+    sort = request.args.get("sort", "hot").strip()
+    limit_str = request.args.get("limit", "10")
     try:
-        limit = int(request.args.get("limit", 10))
+        limit = int(limit_str)
     except ValueError:
-        flash("O limite deve ser um número inteiro.", "warning")
-        return redirect(url_for("index"))
+        flash("O campo 'Número de posts' deve ser um número inteiro.", "warning")
+        return redirect(url_for("home"))
 
-    posts = fetch_posts(subreddit, sort, limit)
-    if posts is None:
-        return redirect(url_for("index"))
+    try:
+        resp = requests.get(
+            FUNCTION_URL,
+            params={"subreddit": subreddit, "sort": sort, "limit": limit},
+            timeout=30
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        posts = data.get("posts", data)
+    except Exception as e:
+        flash(f"Erro ao buscar dados: {e}", "danger")
+        return redirect(url_for("home"))
 
-    # Armazena os posts na sessão ou passa diretamente
-    return render_template("results.html", posts=posts, subreddit=subreddit, sort=sort, limit=limit)
+    # Renderiza index.html com posts preenchidos
+    return render_template("index.html", posts=posts, subreddit=subreddit, limit=limit)
 
 @app.route("/detail_all", methods=["GET"])
 def detail_all():
@@ -82,5 +77,20 @@ def details(post_id):
 
     return render_template("details.html", post=post)
 
+def fetch_posts(subreddit, sort, limit):
+    """Chama a Azure Function e retorna lista de posts ou None em caso de erro."""
+    try:
+        resp = requests.get(FUNCTION_URL, params={
+            "subreddit": subreddit,
+            "sort": sort,
+            "limit": limit
+        })
+        resp.raise_for_status()
+        return resp.json()  # espera uma lista de dicts
+    except Exception as e:
+        flash(f"Erro ao obter posts: {e}", "danger")
+        return None
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
