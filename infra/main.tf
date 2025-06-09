@@ -202,14 +202,6 @@ resource "azurerm_linux_function_app" "main" {
   }
 }
 
-resource "azurerm_function_app_cors" "main" {
-  function_app_id = azurerm_linux_function_app.main.id
-
-  allowed_origins = [
-    "https://portal.azure.com"
-  ]
-}
-
 resource "azurerm_app_service_virtual_network_swift_connection" "func" {
   app_service_id = azurerm_linux_function_app.main.id
   subnet_id      = azurerm_subnet.app.id
