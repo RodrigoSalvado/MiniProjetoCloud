@@ -16,7 +16,7 @@ env:
   WEBAPP_NAME: reddit-app
 
 jobs:
-  infra:
+  setup-oidc:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -35,12 +35,8 @@ jobs:
         run: terraform init
         working-directory: infra
 
-      - name: Validar Terraform
-        run: terraform validate
-        working-directory: infra
-
-      - name: Aplicar infraestrutura
-        run: terraform apply -auto-approve
+      - name: Aplicar só identidade (OIDC)
+        run: terraform apply -auto-approve -target=azuread_application.github_oidc_app -target=azuread_service_principal.github_oidc_sp -target=azuread_application_federated_identity_credential.github_actions
         working-directory: infra
 
       - name: Obter outputs do Terraform
@@ -50,12 +46,40 @@ jobs:
           echo "tenant_id=$(terraform -chdir=infra output -raw tenant_id)" >> $GITHUB_ENV
           echo "subscription_id=$(terraform -chdir=infra output -raw subscription_id)" >> $GITHUB_ENV
 
-      - name: Login no Azure
+  infra:
+    runs-on: ubuntu-latest
+    needs: setup-oidc
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Instalar Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Login no Azure com OIDC
         uses: azure/login@v2
         with:
-          client-id:       ${{ env.client_id }}
-          tenant-id:       ${{ env.tenant_id }}
+          client-id: ${{ env.client_id }}
+          tenant-id: ${{ env.tenant_id }}
           subscription-id: ${{ env.subscription_id }}
+
+      - name: Inicializar Terraform
+        run: terraform init
+        working-directory: infra
+
+      - name: Validar Terraform
+        run: terraform validate
+        working-directory: infra
+
+      - name: Aplicar restante infraestrutura
+        run: terraform apply -auto-approve
+        working-directory: infra
 
   build-and-deploy-function:
     runs-on: ubuntu-latest
