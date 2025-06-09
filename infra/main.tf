@@ -188,6 +188,12 @@ resource "azurerm_linux_function_app" "main" {
     }
   }
 
+  cors {
+    allowed_origins = [
+      "https://portal.azure.com"
+    ]
+  }
+
   app_settings = {
     COSMOS_CONTAINER                      = azurerm_cosmosdb_sql_container.main.name
     COSMOS_DATABASE                       = azurerm_cosmosdb_sql_database.main.name
