@@ -62,16 +62,16 @@ resource "azuread_application" "github_oidc_app" {
 }
 
 resource "azuread_service_principal" "github_oidc_sp" {
-  application_id = azuread_application.github_oidc_app.client_id
+  client_id = azuread_application.github_oidc_app.client_id
 }
 
 resource "azuread_application_federated_identity_credential" "github_actions" {
-  application_object_id = azuread_application.github_oidc_app.object_id
-  display_name          = "github-actions"
-  description           = "Federated identity for GitHub Actions"
-  audiences             = ["api://AzureADTokenExchange"]
-  issuer                = "https://token.actions.githubusercontent.com"
-  subject               = "repo:RodrigoSalvado/MiniProjetoCloud:ref:refs/heads/main"
+  application_id = azuread_application.github_oidc_app.id
+  display_name   = "github-actions"
+  description    = "Federated identity for GitHub Actions"
+  audiences      = ["api://AzureADTokenExchange"]
+  issuer         = "https://token.actions.githubusercontent.com"
+  subject        = "repo:RodrigoSalvado/MiniProjetoCloud:ref:refs/heads/main"
 }
 
 locals {
