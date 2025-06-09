@@ -179,7 +179,7 @@ jobs:
       - name: Fazer deploy da Function App
         run: |
           cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-          func azure functionapp publish ${{ env.FUNCTIONAPP_NAME }} --python --force
+          func azure functionapp publish ${{ env.FUNCTIONAPP_NAME }} --build local --force
 
       - name: Deploy da Web App (Docker)
         uses: azure/webapps-deploy@v2
