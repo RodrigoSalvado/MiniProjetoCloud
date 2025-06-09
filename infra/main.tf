@@ -51,9 +51,13 @@ output "subscription_id" {
 
 provider "azurerm" {
   features {}
+  use_oidc = true
 }
 
-provider "azuread" {}
+provider "azuread" {
+  use_oidc = true
+}
+
 
 data "azurerm_client_config" "current" {}
 
