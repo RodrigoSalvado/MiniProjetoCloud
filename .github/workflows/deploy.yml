@@ -1,4 +1,4 @@
-name: Build and Deploy to Azure (Function App + Web App)
+name: Build and Deploy to Azure ( Terraform + Function App + Web App)
 
 on:
   push:
