@@ -188,12 +188,6 @@ resource "azurerm_linux_function_app" "main" {
     }
   }
 
-  cors {
-    allowed_origins = [
-      "https://portal.azure.com"
-    ]
-  }
-
   app_settings = {
     COSMOS_CONTAINER                      = azurerm_cosmosdb_sql_container.main.name
     COSMOS_DATABASE                       = azurerm_cosmosdb_sql_database.main.name
@@ -206,6 +200,14 @@ resource "azurerm_linux_function_app" "main" {
     TRANSLATOR_ENDPOINT                   = azurerm_cognitive_account.translator.endpoint
     TRANSLATOR_KEY                        = azurerm_cognitive_account.translator.primary_access_key
   }
+}
+
+resource "azurerm_function_app_cors" "main" {
+  function_app_id = azurerm_linux_function_app.main.id
+
+  allowed_origins = [
+    "https://portal.azure.com"
+  ]
 }
 
 resource "azurerm_app_service_virtual_network_swift_connection" "func" {
