@@ -1,5 +1,12 @@
-Flask>=2.2
-requests>=2.31
-pandas>=2.0
+flask
+requests
+pandas
+numpy
+matplotlib
+scipy
+transformers
+torch
+wordcloud
+azure-storage-blob
 azure-cosmos
 dotenv
