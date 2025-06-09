@@ -38,7 +38,11 @@ output "storage_connection_string" {
 }
 
 provider "azurerm" {
-  features {}
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+  }
 }
 
 provider "azuread" {}
@@ -200,6 +204,15 @@ resource "azurerm_linux_function_app" "main" {
 resource "azurerm_app_service_virtual_network_swift_connection" "func" {
   app_service_id = azurerm_linux_function_app.main.id
   subnet_id      = azurerm_subnet.app.id
+}
+
+resource "azurerm_app_service_source_control" "functionapp_sourcecontrol" {
+  app_id   = azurerm_linux_function_app.main.id
+  repo_url = "https://github.com/RodrigoSalvado/MiniProjetoCloud"
+  branch   = "main"
+
+  use_manual_integration = false
+  use_mercurial          = false
 }
 
 resource "azurerm_private_endpoint" "cosmos" {
