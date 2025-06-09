@@ -36,10 +36,12 @@ jobs:
         working-directory: infra
 
       - name: Aplicar só identidade (OIDC)
-        run: terraform apply -auto-approve \
-          -target=azuread_application.github_oidc_app \
-          -target=azuread_service_principal.github_oidc_sp \
-          -target=azuread_application_federated_identity_credential.github_actions
+        run: |
+          terraform apply -auto-approve \
+            -target=azuread_application.github_oidc_app \
+            -target=azuread_service_principal.github_oidc_sp \
+            -target=azuread_application_federated_identity_credential.github_actions
+
         working-directory: infra
 
       - name: Obter outputs do Terraform
