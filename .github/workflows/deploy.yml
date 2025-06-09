@@ -56,7 +56,6 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v4
 
-      # Function App - Python
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -83,15 +82,14 @@ jobs:
           name: python-app
           path: release.zip
 
-      # Web App - Docker
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v2
 
       - name: Login no Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_05F08B3D5D3A42788F364682EB18570A }}
+          password: ${{ secrets.AZUREAPPSERVICE_CONTAINERPASSWORD_3C476478AD3749ADBF692BA277661C71 }}
 
       - name: Build & Push Docker image
         uses: docker/build-push-action@v3
@@ -124,6 +122,13 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Adicionar CORS à Function App (https://portal.azure.com)
+        run: |
+          az functionapp cors add \
+            --name ${{ env.FUNCTIONAPP_NAME }} \
+            --resource-group terraform-cloud \
+            --origin https://portal.azure.com
+
       - name: Instalar Azure Functions Core Tools
         run: npm install -g azure-functions-core-tools@4 --unsafe-perm true
 
@@ -131,13 +136,6 @@ jobs:
         run: |
           cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           func azure functionapp publish ${{ env.FUNCTIONAPP_NAME }} --python --force
-
-      - name: Adicionar CORS à Function App (https://portal.azure.com)
-        run: |
-          az functionapp cors add \
-            --name ${{ env.FUNCTIONAPP_NAME }} \
-            --resource-group terraform-cloud \
-            --origin https://portal.azure.com
 
       - name: Deploy da Web App (Docker)
         uses: azure/webapps-deploy@v2
