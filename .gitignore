@@ -1,6 +1,40 @@
-.terraform
-.terraform.lock.hcl
-main.tf
-terraform.tfstate
-terraform.tfstate.backup
+# Diretórios locais
+__pycache__/
+.venv/
+venv/
+.idea/
+.vscode/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+terraform.tfvars
+*.log
+
+# Terraform dentro da pasta infra (separado)
+infra/.terraform/
+infra/*.tfstate
+infra/*.tfstate.backup
+infra/terraform.tfvars
+
+# Zip da function
+release.zip
+
+# Ficheiros sensíveis ou gerados
+.env
+*.bak
+*.swp
+
+# Evita comitar artefactos Python
+*.pyc
+*.pyo
+
+# Evita duplicar locks se usares pipenv ou poetry
+Pipfile.lock
+poetry.lock
+
+# Ficheiro manual com segredos (se existir)
+script.bash
+
 .DS_Store
