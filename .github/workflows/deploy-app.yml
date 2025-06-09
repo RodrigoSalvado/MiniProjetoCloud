@@ -16,44 +16,8 @@ env:
   WEBAPP_NAME: reddit-app
 
 jobs:
-  setup-oidc:
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-
-    steps:
-      - name: Checkout código
-        uses: actions/checkout@v4
-
-      - name: Instalar Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.6.6
-
-      - name: Inicializar Terraform
-        run: terraform init
-        working-directory: infra
-
-      - name: Aplicar só identidade (OIDC)
-        run: |
-          terraform apply -auto-approve \
-            -target=azuread_application.github_oidc_app \
-            -target=azuread_service_principal.github_oidc_sp \
-            -target=azuread_application_federated_identity_credential.github_actions
-
-        working-directory: infra
-
-      - name: Obter outputs do Terraform
-        id: terraform-outputs
-        run: |
-          echo "client_id=$(terraform -chdir=infra output -raw client_id)" >> $GITHUB_ENV
-          echo "tenant_id=$(terraform -chdir=infra output -raw tenant_id)" >> $GITHUB_ENV
-          echo "subscription_id=$(terraform -chdir=infra output -raw subscription_id)" >> $GITHUB_ENV
-
   infra:
     runs-on: ubuntu-latest
-    needs: setup-oidc
     permissions:
       id-token: write
       contents: read
@@ -70,9 +34,9 @@ jobs:
       - name: Login no Azure com OIDC
         uses: azure/login@v2
         with:
-          client-id: ${{ env.client_id }}
-          tenant-id: ${{ env.tenant_id }}
-          subscription-id: ${{ env.subscription_id }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Inicializar Terraform
         run: terraform init
@@ -82,7 +46,7 @@ jobs:
         run: terraform validate
         working-directory: infra
 
-      - name: Aplicar restante infraestrutura
+      - name: Aplicar toda a infraestrutura
         run: terraform apply -auto-approve
         working-directory: infra
 
@@ -142,8 +106,8 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_05F08B3D5D3A42788F364682EB18570A }}
-          password: ${{ secrets.AZUREAPPSERVICE_CONTAINERPASSWORD_3C476478AD3749ADBF692BA277661C71 }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
       - name: Build e Push da imagem Docker
         uses: docker/build-push-action@v3
@@ -160,6 +124,6 @@ jobs:
         with:
           app-name: ${{ env.WEBAPP_NAME }}
           slot-name: production
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_59513A348E4A48A5998C742CC5A34BC8 }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           images: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
