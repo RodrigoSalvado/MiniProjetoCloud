@@ -34,9 +34,9 @@ jobs:
       - name: Login no Azure com OIDC
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_364836B5784E43ADAFBD69D96A86ACC0 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_2C47BD76EB7446488BF9B28E8165003C }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_F7DA10D7C3FA448CB4FC36F292DE3AB5 }}
 
       - name: Inicializar Terraform
         run: terraform init
@@ -106,8 +106,8 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          username: ${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_05F08B3D5D3A42788F364682EB18570A}}
+          password: ${{ secrets.AZUREAPPSERVICE_CONTAINERPASSWORD_3C476478AD3749ADBF692BA277661C71 }}
 
       - name: Build e Push da imagem Docker
         uses: docker/build-push-action@v3
