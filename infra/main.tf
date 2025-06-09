@@ -37,8 +37,6 @@ output "storage_connection_string" {
   sensitive = true
 }
 
-# Terraform para provisionar a infraestrutura descrita no script Bash
-
 provider "azurerm" {
   features {}
 }
