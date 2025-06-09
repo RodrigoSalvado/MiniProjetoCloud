@@ -220,3 +220,5 @@ resource "azurerm_private_endpoint" "cosmos" {
     is_manual_connection           = false
   }
 }
+
+
