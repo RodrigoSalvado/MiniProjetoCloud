@@ -38,6 +38,12 @@ jobs:
         run: terraform init
         working-directory: ${{ env.TERRAFORM_DIR }}
 
+      - name: Importar resource group existente
+        run: |
+          terraform import azurerm_resource_group.main \
+            /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud
+        working-directory: ${{ env.TERRAFORM_DIR }}
+
       - name: Validar Terraform
         run: terraform validate
         working-directory: ${{ env.TERRAFORM_DIR }}
@@ -145,6 +151,3 @@ jobs:
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           images: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
-
-
-            
