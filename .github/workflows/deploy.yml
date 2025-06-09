@@ -69,6 +69,13 @@ jobs:
 
           terraform import azurerm_linux_function_app.main \
             /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Web/sites/propjetocloudfunctionapp
+
+          terraform import azurerm_subnet.app \
+            /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/virtualNetworks/cloudvnet/subnets/subnetappname
+
+          terraform import azurerm_subnet.priv \
+            /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/virtualNetworks/cloudvnet/subnets/subnetprivname
+
         working-directory: ${{ env.TERRAFORM_DIR }}
 
       - name: Validar Terraform
