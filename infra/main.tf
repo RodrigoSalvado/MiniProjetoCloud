@@ -38,7 +38,7 @@ output "storage_connection_string" {
 }
 
 output "client_id" {
-  value = azuread_application.github_oidc_app.application_id
+  value = azuread_application.github_oidc_app.client_id
 }
 
 output "tenant_id" {
@@ -62,7 +62,7 @@ resource "azuread_application" "github_oidc_app" {
 }
 
 resource "azuread_service_principal" "github_oidc_sp" {
-  application_id = azuread_application.github_oidc_app.application_id
+  application_id = azuread_application.github_oidc_app.client_id
 }
 
 resource "azuread_application_federated_identity_credential" "github_actions" {
@@ -213,7 +213,7 @@ resource "azurerm_linux_function_app" "main" {
   }
 
   app_settings = {
-    CLIENT_ID                             = azuread_application.github_oidc_app.application_id
+    CLIENT_ID                             = azuread_application.github_oidc_app.client_id
     COSMOS_CONTAINER                      = azurerm_cosmosdb_sql_container.main.name
     COSMOS_DATABASE                       = azurerm_cosmosdb_sql_database.main.name
     COSMOS_ENDPOINT                       = azurerm_cosmosdb_account.main.endpoint
