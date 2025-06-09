@@ -37,8 +37,41 @@ output "storage_connection_string" {
   sensitive = true
 }
 
+output "client_id" {
+  value = azuread_application.github_oidc_app.application_id
+}
+
+output "tenant_id" {
+  value = data.azurerm_client_config.current.tenant_id
+}
+
+output "subscription_id" {
+  value = data.azurerm_client_config.current.subscription_id
+}
+
 provider "azurerm" {
   features {}
+}
+
+provider "azuread" {}
+
+data "azurerm_client_config" "current" {}
+
+resource "azuread_application" "github_oidc_app" {
+  display_name = "terraform-deploy"
+}
+
+resource "azuread_service_principal" "github_oidc_sp" {
+  application_id = azuread_application.github_oidc_app.application_id
+}
+
+resource "azuread_application_federated_identity_credential" "github_actions" {
+  application_object_id = azuread_application.github_oidc_app.object_id
+  display_name          = "github-actions"
+  description           = "Federated identity for GitHub Actions"
+  audiences             = ["api://AzureADTokenExchange"]
+  issuer                = "https://token.actions.githubusercontent.com"
+  subject               = "repo:RodrigoSalvado/MiniProjetoCloud:ref:refs/heads/main"
 }
 
 locals {
@@ -180,7 +213,7 @@ resource "azurerm_linux_function_app" "main" {
   }
 
   app_settings = {
-    CLIENT_ID                             = "bzG6zHjC23GSenSIXe0M-Q"
+    CLIENT_ID                             = azuread_application.github_oidc_app.application_id
     COSMOS_CONTAINER                      = azurerm_cosmosdb_sql_container.main.name
     COSMOS_DATABASE                       = azurerm_cosmosdb_sql_database.main.name
     COSMOS_ENDPOINT                       = azurerm_cosmosdb_account.main.endpoint
