@@ -207,15 +207,6 @@ resource "azurerm_app_service_virtual_network_swift_connection" "func" {
   subnet_id      = azurerm_subnet.app.id
 }
 
-resource "azurerm_app_service_source_control" "functionapp_sourcecontrol" {
-  app_id   = azurerm_linux_function_app.main.id
-  repo_url = "https://github.com/RodrigoSalvado/MiniProjetoCloud"
-  branch   = "main"
-
-  use_manual_integration = false
-  use_mercurial          = false
-}
-
 resource "azurerm_private_endpoint" "cosmos" {
   name                = "pe-cosmos"
   location            = local.location
