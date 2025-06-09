@@ -14,7 +14,7 @@ env:
   TAG: latest
   PLATFORM: linux/amd64
   WEBAPP_NAME: 'reddit-app'
-  TERRAFORM_DIR: './infra' # ajusta se o teu main.tf estiver noutro sítio
+  TERRAFORM_DIR: './infra'
 
 jobs:
   terraform:
@@ -131,6 +131,13 @@ jobs:
         run: |
           cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           func azure functionapp publish ${{ env.FUNCTIONAPP_NAME }} --python --force
+
+      - name: Adicionar CORS à Function App (https://portal.azure.com)
+        run: |
+          az functionapp cors add \
+            --name ${{ env.FUNCTIONAPP_NAME }} \
+            --resource-group terraform-cloud \
+            --origin https://portal.azure.com
 
       - name: Deploy da Web App (Docker)
         uses: azure/webapps-deploy@v2
