@@ -34,37 +34,41 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Verificar e criar backend se necessário
+      - name: Criar Storage Account e container 'tfstate' se necessário
         run: |
-          echo "Verificar existência do container 'tfstate'..."
+          echo "Verificar e criar Storage Account e container se necessário..."
 
-          CONTAINER_EXISTS=$(az storage container exists \
-            --name tfstate \
-            --account-name storageprojetocloud \
-            --auth-mode login \
-            --query exists -o tsv)
+          # Verificar se o Resource Group existe
+          RG_EXISTS=$(az group exists --name terraform-cloud)
 
-          if [ "$CONTAINER_EXISTS" = "false" ]; then
-            echo "Container não existe. A criar recursos do backend..."
-
+          if [ "$RG_EXISTS" = "false" ]; then
+            echo "A criar Resource Group..."
             az group create \
               --name terraform-cloud \
               --location northeurope
+          fi
 
+          # Verificar se o Storage Account já existe
+          ACCOUNT_EXISTS=$(az storage account check-name --name storageprojetocloud --query "nameAvailable" -o tsv)
+
+          if [ "$ACCOUNT_EXISTS" = "false" ]; then
+            echo "Storage Account já existe."
+          else
+            echo "A criar Storage Account..."
             az storage account create \
               --name storageprojetocloud \
               --resource-group terraform-cloud \
               --location northeurope \
               --sku Standard_LRS
-
-            az storage container create \
-              --name tfstate \
-              --account-name storageprojetocloud \
-              --auth-mode login \
-              --public-access off
-          else
-            echo "Container 'tfstate' já existe. A continuar..."
           fi
+
+          # Criar o container tfstate (o comando é idempotente)
+          echo "A criar container 'tfstate' (se ainda não existir)..."
+          az storage container create \
+            --name tfstate \
+            --account-name storageprojetocloud \
+            --auth-mode login \
+            --public-access off
 
       - name: Inicializar Terraform
         run: terraform init
@@ -81,6 +85,7 @@ jobs:
       - name: Aplicar Terraform
         run: terraform apply -auto-approve
         working-directory: ${{ env.TERRAFORM_DIR }}
+
 
   build:
     runs-on: ubuntu-latest
