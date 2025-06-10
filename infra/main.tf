@@ -1,42 +1,3 @@
-output "functionapp_name" {
-  value = azurerm_linux_function_app.main.name
-}
-
-output "functionapp_resource_group" {
-  value = azurerm_resource_group.main.name
-}
-
-output "functionapp_publish_url" {
-  value = azurerm_linux_function_app.main.default_hostname
-}
-
-output "functionapp_storage_account" {
-  value = azurerm_storage_account.main.name
-}
-
-output "cosmosdb_endpoint" {
-  value = azurerm_cosmosdb_account.main.endpoint
-}
-
-output "translator_endpoint" {
-  value = azurerm_cognitive_account.translator.endpoint
-}
-
-output "translator_key" {
-  value     = azurerm_cognitive_account.translator.primary_access_key
-  sensitive = true
-}
-
-output "cosmosdb_key" {
-  value     = azurerm_cosmosdb_account.main.primary_key
-  sensitive = true
-}
-
-output "storage_connection_string" {
-  value     = azurerm_storage_account.main.primary_connection_string
-  sensitive = true
-}
-
 terraform {
   backend "azurerm" {
     resource_group_name   = "terraform-cloud"
@@ -230,4 +191,41 @@ resource "azurerm_private_endpoint" "cosmos" {
   }
 }
 
+output "functionapp_name" {
+  value = azurerm_linux_function_app.main.name
+}
 
+output "functionapp_resource_group" {
+  value = azurerm_resource_group.main.name
+}
+
+output "functionapp_publish_url" {
+  value = azurerm_linux_function_app.main.default_hostname
+}
+
+output "functionapp_storage_account" {
+  value = azurerm_storage_account.main.name
+}
+
+output "cosmosdb_endpoint" {
+  value = azurerm_cosmosdb_account.main.endpoint
+}
+
+output "translator_endpoint" {
+  value = azurerm_cognitive_account.translator.endpoint
+}
+
+output "translator_key" {
+  value     = azurerm_cognitive_account.translator.primary_access_key
+  sensitive = true
+}
+
+output "cosmosdb_key" {
+  value     = azurerm_cosmosdb_account.main.primary_key
+  sensitive = true
+}
+
+output "storage_connection_string" {
+  value     = azurerm_storage_account.main.primary_connection_string
+  sensitive = true
+}

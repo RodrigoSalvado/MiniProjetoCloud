@@ -36,19 +36,13 @@ jobs:
 
       - name: Criar Storage Account e container 'tfstate' se necessário
         run: |
-          echo "Verificar e criar Storage Account e container se necessário..."
-
           RG_EXISTS=$(az group exists --name terraform-cloud)
           if [ "$RG_EXISTS" = "false" ]; then
-            echo "A criar Resource Group..."
             az group create --name terraform-cloud --location northeurope
           fi
 
           ACCOUNT_EXISTS=$(az storage account check-name --name storageprojetocloud --query "nameAvailable" -o tsv)
-          if [ "$ACCOUNT_EXISTS" = "false" ]; then
-            echo "Storage Account já existe."
-          else
-            echo "A criar Storage Account..."
+          if [ "$ACCOUNT_EXISTS" = "true" ]; then
             az storage account create \
               --name storageprojetocloud \
               --resource-group terraform-cloud \
@@ -61,16 +55,14 @@ jobs:
             --resource-group terraform-cloud \
             --query '[0].value' -o tsv)
 
-          echo "A criar container 'tfstate' (se ainda não existir)..."
           az storage container create \
             --name tfstate \
             --account-name storageprojetocloud \
             --account-key "$ACCOUNT_KEY" \
             --public-access off
 
-      - name: Exportar variáveis ARM para autenticação do backend Terraform
+      - name: Exportar variáveis ARM
         run: |
-          echo "A exportar variáveis ARM..."
           echo "ARM_CLIENT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .clientId)" >> $GITHUB_ENV
           echo "ARM_CLIENT_SECRET=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .clientSecret)" >> $GITHUB_ENV
           echo "ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .subscriptionId)" >> $GITHUB_ENV
@@ -80,9 +72,56 @@ jobs:
         run: terraform init
         working-directory: ${{ env.TERRAFORM_DIR }}
 
-      - name: Plano Terraform
-        run: terraform plan
-        working-directory: ${{ env.TERRAFORM_DIR }}
+      - name: Importar recursos se não existirem no estado
+        run: |
+          cd ${{ env.TERRAFORM_DIR }}
+          check_and_import () {
+            local name=$1
+            local id=$2
+            terraform state list | grep -q "$name" || terraform import "$name" "$id"
+          }
+
+          check_and_import azurerm_resource_group.main \
+            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud
+
+          check_and_import azurerm_storage_account.main \
+            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Storage/storageAccounts/storageprojetocloud
+
+          check_and_import azurerm_storage_container.tfstate \
+            https://storageprojetocloud.blob.core.windows.net/tfstate
+
+          check_and_import azurerm_cognitive_account.translator \
+            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.CognitiveServices/accounts/translator-service
+
+          check_and_import azurerm_virtual_network.main \
+            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/virtualNetworks/cloudvnet
+
+          check_and_import azurerm_subnet.app \
+            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/virtualNetworks/cloudvnet/subnets/subnetappname
+
+          check_and_import azurerm_subnet.priv \
+            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/virtualNetworks/cloudvnet/subnets/subnetprivname
+
+          check_and_import azurerm_cosmosdb_account.main \
+            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.DocumentDB/databaseAccounts/terraformcloudcosmosdb
+
+          check_and_import azurerm_cosmosdb_sql_database.main \
+            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.DocumentDB/databaseAccounts/terraformcloudcosmosdb/sqlDatabases/RedditApp
+
+          check_and_import azurerm_cosmosdb_sql_container.main \
+            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.DocumentDB/databaseAccounts/terraformcloudcosmosdb/sqlDatabases/RedditApp/containers/posts
+
+          check_and_import azurerm_service_plan.main \
+            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Web/serverFarms/asp-project-cloud
+
+          check_and_import azurerm_linux_web_app.web \
+            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Web/sites/reddit-app
+
+          check_and_import azurerm_linux_function_app.main \
+            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Web/sites/propjetocloudfunctionapp
+
+          check_and_import azurerm_private_endpoint.cosmos \
+            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/privateEndpoints/pe-cosmos
 
       - name: Validar Terraform
         run: terraform validate
