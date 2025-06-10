@@ -17,7 +17,7 @@ env:
   TERRAFORM_DIR: './infra'
 
 jobs:
-    terraform:
+  terraform:
     runs-on: ubuntu-latest
 
     steps:
@@ -38,19 +38,13 @@ jobs:
         run: |
           echo "Verificar e criar Storage Account e container se necessário..."
 
-          # Verificar se o Resource Group existe
           RG_EXISTS=$(az group exists --name terraform-cloud)
-
           if [ "$RG_EXISTS" = "false" ]; then
             echo "A criar Resource Group..."
-            az group create \
-              --name terraform-cloud \
-              --location northeurope
+            az group create --name terraform-cloud --location northeurope
           fi
 
-          # Verificar se o Storage Account já existe
           ACCOUNT_EXISTS=$(az storage account check-name --name storageprojetocloud --query "nameAvailable" -o tsv)
-
           if [ "$ACCOUNT_EXISTS" = "false" ]; then
             echo "Storage Account já existe."
           else
@@ -62,13 +56,11 @@ jobs:
               --sku Standard_LRS
           fi
 
-          # Obter chave de acesso ao Storage Account
           ACCOUNT_KEY=$(az storage account keys list \
             --account-name storageprojetocloud \
             --resource-group terraform-cloud \
             --query '[0].value' -o tsv)
 
-          # Criar o container 'tfstate'
           echo "A criar container 'tfstate' (se ainda não existir)..."
           az storage container create \
             --name tfstate \
@@ -79,15 +71,10 @@ jobs:
       - name: Exportar variáveis ARM para autenticação do backend Terraform
         run: |
           echo "A exportar variáveis ARM..."
-          export ARM_CLIENT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .clientId)
-          export ARM_CLIENT_SECRET=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .clientSecret)
-          export ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .subscriptionId)
-          export ARM_TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .tenantId)
-
-          echo "ARM_CLIENT_ID=$ARM_CLIENT_ID" >> $GITHUB_ENV
-          echo "ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET" >> $GITHUB_ENV
-          echo "ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID" >> $GITHUB_ENV
-          echo "ARM_TENANT_ID=$ARM_TENANT_ID" >> $GITHUB_ENV
+          echo "ARM_CLIENT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .clientId)" >> $GITHUB_ENV
+          echo "ARM_CLIENT_SECRET=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .clientSecret)" >> $GITHUB_ENV
+          echo "ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .subscriptionId)" >> $GITHUB_ENV
+          echo "ARM_TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .tenantId)" >> $GITHUB_ENV
 
       - name: Inicializar Terraform
         run: terraform init
@@ -104,7 +91,6 @@ jobs:
       - name: Aplicar Terraform
         run: terraform apply -auto-approve
         working-directory: ${{ env.TERRAFORM_DIR }}
-
 
   build:
     runs-on: ubuntu-latest
@@ -127,8 +113,7 @@ jobs:
           source venv/bin/activate
 
       - name: Instalar dependências da Function
-        run: |
-          pip install -r ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/requirements.txt
+        run: pip install -r ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/requirements.txt
 
       - name: Zip Function App
         run: |
@@ -192,8 +177,7 @@ jobs:
         run: npm install -g azure-functions-core-tools@4 --unsafe-perm true
 
       - name: Instalar dependências da Function App (no deploy)
-        run: |
-          pip install -r ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/requirements.txt
+        run: pip install -r ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/requirements.txt
 
       - name: Fazer deploy da Function App
         run: |
