@@ -163,7 +163,7 @@ jobs:
 
       - name: Criar e ativar ambiente virtual
         run: |
-          python -m venv venv
+          python${{ env.PYTHON_VERSION }} -m venv venv
           source venv/bin/activate
 
       - name: Instalar dependências da Function
@@ -226,6 +226,13 @@ jobs:
             --name ${{ env.FUNCTIONAPP_NAME }} \
             --resource-group terraform-cloud \
             --allowed-origins https://portal.azure.com
+
+      - name: Forçar versão do runtime Python na Function App
+        run: |
+          az functionapp config set \
+            --name ${{ env.FUNCTIONAPP_NAME }} \
+            --resource-group terraform-cloud \
+            --linux-fx-version "Python|${{ env.PYTHON_VERSION }}"
 
       - name: Instalar Azure Functions Core Tools
         run: npm install -g azure-functions-core-tools@4 --unsafe-perm true

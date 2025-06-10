@@ -157,6 +157,7 @@ resource "azurerm_linux_function_app" "main" {
     application_stack {
       python_version = "3.11"
     }
+    linux_fx_version = "Python|3.11"
   }
 
   app_settings = {
