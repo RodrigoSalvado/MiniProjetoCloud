@@ -116,6 +116,15 @@ jobs:
 
           check_and_import azurerm_subnet.priv \
             /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/virtualNetworks/cloudvnet/subnets/subnetprivname
+            
+          terraform import azurerm_public_ip.nat \
+            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/publicIPAddresses/nat-ip
+
+          terraform import azurerm_nat_gateway.main \
+            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/natGateways/nat-gateway
+
+          terraform import azurerm_subnet_nat_gateway_association.app \
+            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/virtualNetworks/cloudvnet/subnets/subnetappname/natGatewayAssociation
 
           check_and_import azurerm_cosmosdb_account.main \
             /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.DocumentDB/databaseAccounts/terraformcloudcosmosdb

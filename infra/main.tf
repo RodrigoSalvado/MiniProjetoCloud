@@ -74,6 +74,30 @@ resource "azurerm_subnet" "priv" {
   address_prefixes     = ["10.10.2.0/24"]
 }
 
+resource "azurerm_public_ip" "nat" {
+  name                = "nat-ip"
+  location            = local.location
+  resource_group_name = azurerm_resource_group.main.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+}
+
+resource "azurerm_nat_gateway" "main" {
+  name                = "nat-gateway"
+  location            = local.location
+  resource_group_name = azurerm_resource_group.main.name
+  sku_name            = "Standard"
+
+  public_ip_ids = [
+    azurerm_public_ip.nat.id
+  ]
+}
+
+resource "azurerm_subnet_nat_gateway_association" "app" {
+  subnet_id      = azurerm_subnet.app.id
+  nat_gateway_id = azurerm_nat_gateway.main.id
+}
+
 resource "azurerm_cosmosdb_account" "main" {
   name                = local.cosmos_name
   location            = local.location
