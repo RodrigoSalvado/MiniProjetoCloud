@@ -62,12 +62,18 @@ jobs:
               --sku Standard_LRS
           fi
 
-          # Criar o container tfstate (o comando é idempotente)
+          # Obter chave de acesso ao Storage Account
+          ACCOUNT_KEY=$(az storage account keys list \
+            --account-name storageprojetocloud \
+            --resource-group terraform-cloud \
+            --query '[0].value' -o tsv)
+
+          # Criar o container 'tfstate'
           echo "A criar container 'tfstate' (se ainda não existir)..."
           az storage container create \
             --name tfstate \
             --account-name storageprojetocloud \
-            --auth-mode login \
+            --account-key "$ACCOUNT_KEY" \
             --public-access off
 
       - name: Inicializar Terraform
@@ -85,7 +91,6 @@ jobs:
       - name: Aplicar Terraform
         run: terraform apply -auto-approve
         working-directory: ${{ env.TERRAFORM_DIR }}
-
 
   build:
     runs-on: ubuntu-latest
