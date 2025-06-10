@@ -203,7 +203,7 @@ resource "azurerm_linux_function_app" "main" {
     SECRET                               = "DoywW0Lcc26rvDforDKkLOSQsUUwYA"
     TRANSLATOR_ENDPOINT                  = azurerm_cognitive_account.translator.endpoint
     TRANSLATOR_KEY                       = azurerm_cognitive_account.translator.primary_access_key
-    CLIENT_ID                            = data.azurerm_client_config.current.client_id
+    CLIENT_ID                            = "bzG6zHjC23GSenSIXe0M-Q"
   }
 }
 
