@@ -68,6 +68,10 @@ jobs:
           echo "ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .subscriptionId)" >> $GITHUB_ENV
           echo "ARM_TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .tenantId)" >> $GITHUB_ENV
 
+      - name: Inicializar Terraform com upgrade
+        run: terraform init -upgrade
+        working-directory: ${{ env.TERRAFORM_DIR }}    
+        
       - name: Inicializar Terraform
         run: terraform init
         working-directory: ${{ env.TERRAFORM_DIR }}
