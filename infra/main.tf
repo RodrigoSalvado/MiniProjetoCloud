@@ -209,6 +209,7 @@ resource "azurerm_linux_function_app" "main" {
     TRANSLATOR_ENDPOINT                  = azurerm_cognitive_account.translator.endpoint
     TRANSLATOR_KEY                       = azurerm_cognitive_account.translator.primary_access_key
     CLIENT_ID                            = "bzG6zHjC23GSenSIXe0M-Q"
+    APPINSIGHTS_INSTRUMENTATIONKEY       = azurerm_application_insights.main.instrumentation_key
   }
 }
 
