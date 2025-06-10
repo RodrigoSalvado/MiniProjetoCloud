@@ -135,7 +135,7 @@ resource "azurerm_cosmosdb_sql_container" "main" {
   resource_group_name = azurerm_resource_group.main.name
   account_name        = azurerm_cosmosdb_account.main.name
   database_name       = azurerm_cosmosdb_sql_database.main.name
-  partition_key_path  = "/id"
+  partition_key_paths = ["/id"]
 }
 
 resource "azurerm_service_plan" "main" {
@@ -154,11 +154,11 @@ resource "azurerm_linux_web_app" "web" {
 
   site_config {
     always_on = true
-    application_stack {
-      docker_image     = "rodrig0salv/minha-app"
-      docker_image_tag = "latest"
-    }
+
+    container_registry_managed_identity_client_id = null
+    linux_fx_version = "DOCKER|rodrig0salv/minha-app:latest"
   }
+
 }
 
 resource "azurerm_app_service_virtual_network_swift_connection" "web" {
