@@ -95,47 +95,23 @@ jobs:
             fi
           }
 
-          check_and_import azurerm_resource_group.main \
-            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud
-
-          check_and_import azurerm_storage_account.main \
-            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Storage/storageAccounts/storageprojetocloud
-
-          check_and_import azurerm_storage_container.tfstate \
-            https://storageprojetocloud.blob.core.windows.net/tfstate
-
-          check_and_import azurerm_cognitive_account.translator \
-            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.CognitiveServices/accounts/translator-service
-
-          check_and_import azurerm_virtual_network.main \
-            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/virtualNetworks/cloudvnet
-
-          check_and_import azurerm_subnet.app \
-            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/virtualNetworks/cloudvnet/subnets/subnetappname
-
-          check_and_import azurerm_subnet.priv \
-            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/virtualNetworks/cloudvnet/subnets/subnetprivname
-
-          check_and_import azurerm_cosmosdb_account.main \
-            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.DocumentDB/databaseAccounts/terraformcloudcosmosdb
-
-          check_and_import azurerm_cosmosdb_sql_database.main \
-            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.DocumentDB/databaseAccounts/terraformcloudcosmosdb/sqlDatabases/RedditApp
-
-          check_and_import azurerm_cosmosdb_sql_container.main \
-            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.DocumentDB/databaseAccounts/terraformcloudcosmosdb/sqlDatabases/RedditApp/containers/posts
-
-          check_and_import azurerm_service_plan.main \
-            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Web/serverFarms/asp-project-cloud
-
-          check_and_import azurerm_linux_web_app.web \
-            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Web/sites/reddit-app
-
-          check_and_import azurerm_linux_function_app.main \
-            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Web/sites/propjetocloudfunctionapp
-
-          check_and_import azurerm_private_endpoint.cosmos \
-            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/privateEndpoints/pe-cosmos
+          check_and_import azurerm_resource_group.main /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud
+          check_and_import azurerm_storage_account.main /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Storage/storageAccounts/storageprojetocloud
+          check_and_import azurerm_storage_container.tfstate https://storageprojetocloud.blob.core.windows.net/tfstate
+          check_and_import azurerm_cognitive_account.translator /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.CognitiveServices/accounts/translator-service
+          check_and_import azurerm_virtual_network.main /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/virtualNetworks/cloudvnet
+          check_and_import azurerm_subnet.app /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/virtualNetworks/cloudvnet/subnets/subnetappname
+          check_and_import azurerm_subnet.priv /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/virtualNetworks/cloudvnet/subnets/subnetprivname
+          check_and_import azurerm_public_ip.nat /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/publicIPAddresses/nat-ip
+          check_and_import azurerm_nat_gateway.main /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/natGateways/nat-gateway
+          check_and_import azurerm_subnet_nat_gateway_association.app /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/virtualNetworks/cloudvnet/subnets/subnetappname/natGatewayAssociation
+          check_and_import azurerm_cosmosdb_account.main /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.DocumentDB/databaseAccounts/terraformcloudcosmosdb
+          check_and_import azurerm_cosmosdb_sql_database.main /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.DocumentDB/databaseAccounts/terraformcloudcosmosdb/sqlDatabases/RedditApp
+          check_and_import azurerm_cosmosdb_sql_container.main /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.DocumentDB/databaseAccounts/terraformcloudcosmosdb/sqlDatabases/RedditApp/containers/posts
+          check_and_import azurerm_service_plan.main /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Web/serverFarms/asp-project-cloud
+          check_and_import azurerm_linux_web_app.web /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Web/sites/reddit-app
+          check_and_import azurerm_linux_function_app.main /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Web/sites/propjetocloudfunctionapp
+          check_and_import azurerm_private_endpoint.cosmos /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/privateEndpoints/pe-cosmos
 
       - name: Validar Terraform
         run: terraform validate
