@@ -1,4 +1,10 @@
 terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "3.83.0"
+    }
+  }
   backend "azurerm" {
     resource_group_name   = "terraform-cloud"
     storage_account_name  = "storageprojetocloud"
@@ -88,8 +94,11 @@ resource "azurerm_nat_gateway" "main" {
   resource_group_name = azurerm_resource_group.main.name
   sku_name            = "Standard"
 
-  public_ip_address_ids = [azurerm_public_ip.nat.id]
+  public_ip_address {
+    id = azurerm_public_ip.nat.id
+  }
 }
+
 
 resource "azurerm_subnet_nat_gateway_association" "app" {
   subnet_id      = azurerm_subnet.app.id
