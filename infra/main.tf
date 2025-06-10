@@ -159,7 +159,7 @@ resource "azurerm_linux_function_app" "main" {
     }
   }
 
-  app_settings = {
+    app_settings = {
     COSMOS_CONTAINER                      = azurerm_cosmosdb_sql_container.main.name
     COSMOS_DATABASE                       = azurerm_cosmosdb_sql_database.main.name
     COSMOS_ENDPOINT                       = azurerm_cosmosdb_account.main.endpoint
@@ -170,7 +170,9 @@ resource "azurerm_linux_function_app" "main" {
     SECRET                                = "DoywW0Lcc26rvDforDKkLOSQsUUwYA"
     TRANSLATOR_ENDPOINT                   = azurerm_cognitive_account.translator.endpoint
     TRANSLATOR_KEY                        = azurerm_cognitive_account.translator.primary_access_key
+    CLIENT_ID                             = data.azurerm_client_config.current.client_id
   }
+
 }
 
 resource "azurerm_app_service_virtual_network_swift_connection" "func" {
