@@ -185,7 +185,7 @@ jobs:
         run: |
           cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           source ../.venv/bin/activate
-          func azure functionapp publish ${{ env.FUNCTIONAPP_NAME }} --build local
+          func azure functionapp publish ${{ env.FUNCTIONAPP_NAME }} --build local --python
 
       - name: Configurar Web App para usar imagem Docker
         run: |
