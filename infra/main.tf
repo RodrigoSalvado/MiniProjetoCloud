@@ -153,18 +153,13 @@ resource "azurerm_linux_web_app" "web" {
   service_plan_id     = azurerm_service_plan.main.id
 
   site_config {
-    always_on        = true
-    fx_version       = "DOCKER|rodrig0salv/minha-app:latest"
-  }
-
-  app_settings = {
-    WEBSITES_ENABLE_APP_SERVICE_STORAGE = "false"
-    DOCKER_REGISTRY_SERVER_USERNAME     = "SEU_USERNAME" # opcional, se usares private registry
-    DOCKER_REGISTRY_SERVER_PASSWORD     = "SEU_PASSWORD" # idem
+    always_on = true
+    application_stack {
+      docker_image     = "rodrig0salv/minha-app"
+      docker_image_tag = "latest"
+    }
   }
 }
-
-
 
 
 
