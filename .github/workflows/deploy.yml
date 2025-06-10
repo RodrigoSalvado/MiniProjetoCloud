@@ -63,10 +63,9 @@ jobs:
 
       - name: Exportar variáveis ARM
         run: |
-          echo "ARM_CLIENT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .clientId)" >> $GITHUB_ENV
-          echo "ARM_CLIENT_SECRET=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .clientSecret)" >> $GITHUB_ENV
-          echo "ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .subscriptionId)" >> $GITHUB_ENV
-          echo "ARM_TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .tenantId)" >> $GITHUB_ENV
+          echo "ARM_CLIENT_ID=$(az ad signed-in-user show --query 'id' -o tsv)" >> $GITHUB_ENV
+          echo "ARM_SUBSCRIPTION_ID=$(az account show --query 'id' -o tsv)" >> $GITHUB_ENV
+          echo "ARM_TENANT_ID=$(az account show --query 'tenantId' -o tsv)" >> $GITHUB_ENV
 
       - name: Inicializar Terraform
         run: terraform init
@@ -116,15 +115,6 @@ jobs:
 
           check_and_import azurerm_subnet.priv \
             /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/virtualNetworks/cloudvnet/subnets/subnetprivname
-            
-          terraform import azurerm_public_ip.nat \
-            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/publicIPAddresses/nat-ip
-
-          terraform import azurerm_nat_gateway.main \
-            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/natGateways/nat-gateway
-
-          terraform import azurerm_subnet_nat_gateway_association.app \
-            /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/virtualNetworks/cloudvnet/subnets/subnetappname/natGatewayAssociation
 
           check_and_import azurerm_cosmosdb_account.main \
             /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.DocumentDB/databaseAccounts/terraformcloudcosmosdb
@@ -154,6 +144,7 @@ jobs:
       - name: Aplicar Terraform
         run: terraform apply -auto-approve
         working-directory: ${{ env.TERRAFORM_DIR }}
+
 
   build:
     runs-on: ubuntu-latest
