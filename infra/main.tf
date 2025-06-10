@@ -184,7 +184,7 @@ resource "azurerm_linux_function_app" "main" {
     application_insights_connection_string = "InstrumentationKey=41fe2caa-b77f-4aa5-8343-26999e3e615e;IngestionEndpoint=https://francecentral-1.in.applicationinsights.azure.com/;LiveEndpoint=https://francecentral.livediagnostics.monitor.azure.com/;ApplicationId=99384196-8b49-473d-9e1c-7f7f861b5f46"
     always_on = true
     application_stack {
-      python_version = "3.12"
+      python_version = "3.11"
     }
   }
 
