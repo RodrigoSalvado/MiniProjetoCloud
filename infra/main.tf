@@ -14,7 +14,10 @@ terraform {
 }
 
 provider "azurerm" {
-  skip_provider_registration = true
+  resource_provider_registration {
+    enabled = false
+  }
+
   features {
     resource_group {
       prevent_deletion_if_contains_resources = false
@@ -154,10 +157,10 @@ resource "azurerm_linux_web_app" "web" {
 
   site_config {
     always_on = true
-    application_stack {
-      docker_image     = "rodrig0salv/minha-app"
-      docker_image_tag = "latest"
-    }
+  }
+
+  app_settings = {
+    WEBSITES_ENABLE_APP_SERVICE_STORAGE = "false"
   }
 }
 
