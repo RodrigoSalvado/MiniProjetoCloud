@@ -68,12 +68,38 @@ jobs:
           echo "ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .subscriptionId)" >> $GITHUB_ENV
           echo "ARM_TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .tenantId)" >> $GITHUB_ENV
 
-      - name: Associar manualmente o Public IP ao NAT Gateway
+      - name: Importar recursos existentes
         run: |
-          az network nat gateway update \
-            --name nat-gateway \
-            --resource-group terraform-cloud \
-            --public-ip-addresses nat-ip
+          cd ${{ env.TERRAFORM_DIR }}
+
+          check_and_import () {
+            local name="$1"
+            local id="$2"
+
+            echo "🔍 A verificar $name..."
+            if terraform state list | grep -q "$name"; then
+              echo "✅ $name já está no estado."
+            else
+              echo "➡️ A importar $name..."
+              terraform import "$name" "$id" || echo "⚠️ Falha ao importar $name."
+            fi
+          }
+
+          check_and_import azurerm_resource_group.main "/subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud"
+          check_and_import azurerm_cognitive_account.translator "/subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.CognitiveServices/accounts/translator-service"
+          check_and_import azurerm_virtual_network.main "/subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/virtualNetworks/cloudvnet"
+          check_and_import azurerm_subnet.app "/subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/virtualNetworks/cloudvnet/subnets/subnetappname"
+          check_and_import azurerm_subnet.priv "/subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/virtualNetworks/cloudvnet/subnets/subnetprivname"
+          check_and_import azurerm_public_ip.nat "/subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/publicIPAddresses/nat-ip"
+          check_and_import azurerm_nat_gateway.main "/subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/natGateways/nat-gateway"
+          check_and_import azurerm_cosmosdb_account.main "/subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.DocumentDB/databaseAccounts/terraformcloudcosmosdb"
+          check_and_import azurerm_cosmosdb_sql_database.main "/subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.DocumentDB/databaseAccounts/terraformcloudcosmosdb/sqlDatabases/RedditApp"
+          check_and_import azurerm_cosmosdb_sql_container.main "/subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.DocumentDB/databaseAccounts/terraformcloudcosmosdb/sqlDatabases/RedditApp/containers/posts"
+          check_and_import azurerm_service_plan.main "/subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Web/serverFarms/asp-project-cloud"
+          check_and_import azurerm_linux_web_app.web "/subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Web/sites/reddit-app"
+          check_and_import azurerm_linux_function_app.main "/subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Web/sites/propjetocloudfunctionapp"
+          check_and_import azurerm_storage_account.main "/subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Storage/storageAccounts/storageprojetocloud"
+          check_and_import azurerm_private_endpoint.cosmos "/subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/privateEndpoints/pe-cosmos"
 
       - name: Inicializar Terraform com upgrade
         run: terraform init -upgrade
