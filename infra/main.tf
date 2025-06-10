@@ -154,15 +154,18 @@ resource "azurerm_linux_web_app" "web" {
 
   site_config {
     always_on = true
-
     application_stack {
-      docker {
-        image_name   = "rodrig0salv/minha-app"
-        image_tag    = "latest"
-      }
+      docker_image     = "rodrig0salv/minha-app"
+      docker_image_tag = "latest"
     }
   }
+
+  app_settings = {
+    WEBSITES_ENABLE_APP_SERVICE_STORAGE = "false"
+    DOCKER_REGISTRY_SERVER_URL         = "https://index.docker.io"
+  }
 }
+
 
 
 resource "azurerm_app_service_virtual_network_swift_connection" "web" {
