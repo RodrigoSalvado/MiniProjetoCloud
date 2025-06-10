@@ -155,11 +155,15 @@ resource "azurerm_linux_web_app" "web" {
   site_config {
     always_on = true
 
-    container_registry_managed_identity_client_id = null
-    linux_fx_version = "DOCKER|rodrig0salv/minha-app:latest"
+    application_stack {
+      docker {
+        image_name   = "rodrig0salv/minha-app"
+        image_tag    = "latest"
+      }
+    }
   }
-
 }
+
 
 resource "azurerm_app_service_virtual_network_swift_connection" "web" {
   app_service_id = azurerm_linux_web_app.web.id
