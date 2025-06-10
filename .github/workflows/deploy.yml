@@ -76,7 +76,8 @@ jobs:
         run: |
           az cognitiveservices account purge \
             --name translator-service \
-            --resource-group terraform-cloud || echo "Nada para purgar"
+            --resource-group terraform-cloud \
+            --location northeurope || echo "Nada para purgar"
 
       - name: Importar recursos se não existirem no estado
         run: |
