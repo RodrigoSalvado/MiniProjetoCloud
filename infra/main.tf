@@ -53,6 +53,13 @@ resource "azurerm_cognitive_account" "translator" {
   sku_name            = "F0"
 }
 
+resource "azurerm_application_insights" "main" {
+  name                = "appinsights-projetocloud"
+  location            = local.location
+  resource_group_name = azurerm_resource_group.main.name
+  application_type    = "web"
+}
+
 resource "azurerm_virtual_network" "main" {
   name                = local.vnet_name
   address_space       = ["10.10.0.0/16"]
@@ -161,8 +168,6 @@ resource "azurerm_linux_web_app" "web" {
   }
 }
 
-
-
 resource "azurerm_app_service_virtual_network_swift_connection" "web" {
   app_service_id = azurerm_linux_web_app.web.id
   subnet_id      = azurerm_subnet.app.id
@@ -186,7 +191,7 @@ resource "azurerm_linux_function_app" "main" {
 
   site_config {
     always_on = true
-    application_insights_connection_string = "InstrumentationKey=41fe2caa-b77f-4aa5-8343-26999e3e615e"
+    application_insights_connection_string = azurerm_application_insights.main.connection_string
     application_stack {
       python_version = "3.11"
     }
