@@ -131,7 +131,6 @@ jobs:
           check_and_import azurerm_private_endpoint.cosmos \
             /subscriptions/${{ env.ARM_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/privateEndpoints/pe-cosmos
 
-
       - name: Validar Terraform
         run: terraform validate
         working-directory: ${{ env.TERRAFORM_DIR }}
