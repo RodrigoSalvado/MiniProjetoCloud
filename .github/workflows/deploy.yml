@@ -111,8 +111,8 @@ jobs:
 
       - name: Instalar dependências da Function
         run: |
-          source venv/bin/activate
-          pip install -r ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/requirements.txt
+            pip install -r ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/requirements.txt
+
 
       - name: Zip Function App
         run: |
@@ -178,8 +178,10 @@ jobs:
 
       - name: Fazer deploy da Function App
         run: |
-          cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-          func azure functionapp publish ${{ env.FUNCTIONAPP_NAME }} --build local --python --force
+            source venv/bin/activate
+            cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+            func azure functionapp publish ${{ env.FUNCTIONAPP_NAME }} --build local --python --force
+
 
 
       - name: Deploy da Web App (Docker)
