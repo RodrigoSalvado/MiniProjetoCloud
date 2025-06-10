@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "3.83.0"
+      version = "~> 3.83.0"
     }
   }
   backend "azurerm" {
@@ -67,7 +67,7 @@ resource "azurerm_subnet" "app" {
   delegation {
     name = "appsvc"
     service_delegation {
-      name = "Microsoft.Web/serverFarms"
+      name    = "Microsoft.Web/serverFarms"
       actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
     }
   }
@@ -93,10 +93,12 @@ resource "azurerm_nat_gateway" "main" {
   location            = local.location
   resource_group_name = azurerm_resource_group.main.name
   sku_name            = "Standard"
-
-  public_ip_addresses = [azurerm_public_ip.nat.id]
 }
 
+resource "azurerm_nat_gateway_public_ip_association" "main" {
+  nat_gateway_id       = azurerm_nat_gateway.main.id
+  public_ip_address_id = azurerm_public_ip.nat.id
+}
 
 resource "azurerm_subnet_nat_gateway_association" "app" {
   subnet_id      = azurerm_subnet.app.id
@@ -132,7 +134,7 @@ resource "azurerm_cosmosdb_sql_container" "main" {
   resource_group_name = azurerm_resource_group.main.name
   account_name        = azurerm_cosmosdb_account.main.name
   database_name       = azurerm_cosmosdb_sql_database.main.name
-  partition_key_path = "/id"
+  partition_key_path  = "/id"
 }
 
 resource "azurerm_service_plan" "main" {
@@ -158,7 +160,6 @@ resource "azurerm_linux_web_app" "web" {
   }
 }
 
-
 resource "azurerm_app_service_virtual_network_swift_connection" "web" {
   app_service_id = azurerm_linux_web_app.web.id
   subnet_id      = azurerm_subnet.app.id
@@ -181,27 +182,26 @@ resource "azurerm_linux_function_app" "main" {
   storage_account_access_key = azurerm_storage_account.main.primary_access_key
 
   site_config {
-    application_insights_connection_string = "InstrumentationKey=41fe2caa-b77f-4aa5-8343-26999e3e615e;IngestionEndpoint=https://francecentral-1.in.applicationinsights.azure.com/;LiveEndpoint=https://francecentral.livediagnostics.monitor.azure.com/;ApplicationId=99384196-8b49-473d-9e1c-7f7f861b5f46"
     always_on = true
+    application_insights_connection_string = "InstrumentationKey=41fe2caa-b77f-4aa5-8343-26999e3e615e"
     application_stack {
       python_version = "3.11"
     }
   }
 
-    app_settings = {
-    COSMOS_CONTAINER                      = azurerm_cosmosdb_sql_container.main.name
-    COSMOS_DATABASE                       = azurerm_cosmosdb_sql_database.main.name
-    COSMOS_ENDPOINT                       = azurerm_cosmosdb_account.main.endpoint
-    COSMOS_KEY                            = azurerm_cosmosdb_account.main.primary_key
-    DEPLOYMENT_STORAGE_CONNECTION_STRING  = azurerm_storage_account.main.primary_connection_string
-    REDDIT_PASSWORD                       = "miniprojetocloud"
-    REDDIT_USER                           = "Major-Noise-6411"
-    SECRET                                = "DoywW0Lcc26rvDforDKkLOSQsUUwYA"
-    TRANSLATOR_ENDPOINT                   = azurerm_cognitive_account.translator.endpoint
-    TRANSLATOR_KEY                        = azurerm_cognitive_account.translator.primary_access_key
-    CLIENT_ID                             = data.azurerm_client_config.current.client_id
+  app_settings = {
+    COSMOS_CONTAINER                     = azurerm_cosmosdb_sql_container.main.name
+    COSMOS_DATABASE                      = azurerm_cosmosdb_sql_database.main.name
+    COSMOS_ENDPOINT                      = azurerm_cosmosdb_account.main.endpoint
+    COSMOS_KEY                           = azurerm_cosmosdb_account.main.primary_key
+    DEPLOYMENT_STORAGE_CONNECTION_STRING = azurerm_storage_account.main.primary_connection_string
+    REDDIT_PASSWORD                      = "miniprojetocloud"
+    REDDIT_USER                          = "Major-Noise-6411"
+    SECRET                               = "DoywW0Lcc26rvDforDKkLOSQsUUwYA"
+    TRANSLATOR_ENDPOINT                  = azurerm_cognitive_account.translator.endpoint
+    TRANSLATOR_KEY                       = azurerm_cognitive_account.translator.primary_access_key
+    CLIENT_ID                            = data.azurerm_client_config.current.client_id
   }
-
 }
 
 resource "azurerm_app_service_virtual_network_swift_connection" "func" {
