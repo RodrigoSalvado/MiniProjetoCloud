@@ -94,9 +94,7 @@ resource "azurerm_nat_gateway" "main" {
   resource_group_name = azurerm_resource_group.main.name
   sku_name            = "Standard"
 
-  public_ip_address {
-    id = azurerm_public_ip.nat.id
-  }
+  public_ip_address_ids = [azurerm_public_ip.nat.id]
 }
 
 
@@ -134,7 +132,7 @@ resource "azurerm_cosmosdb_sql_container" "main" {
   resource_group_name = azurerm_resource_group.main.name
   account_name        = azurerm_cosmosdb_account.main.name
   database_name       = azurerm_cosmosdb_sql_database.main.name
-  partition_key_paths = ["/id"]
+  partition_key_path = "/id"
 }
 
 resource "azurerm_service_plan" "main" {
