@@ -34,51 +34,44 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Verificar e criar backend se necessário
+        run: |
+          echo "Verificar existência do container 'tfstate'..."
+
+          CONTAINER_EXISTS=$(az storage container exists \
+            --name tfstate \
+            --account-name storageprojetocloud \
+            --auth-mode login \
+            --query exists -o tsv)
+
+          if [ "$CONTAINER_EXISTS" = "false" ]; then
+            echo "Container não existe. A criar recursos do backend..."
+
+            az group create \
+              --name terraform-cloud \
+              --location northeurope
+
+            az storage account create \
+              --name storageprojetocloud \
+              --resource-group terraform-cloud \
+              --location northeurope \
+              --sku Standard_LRS
+
+            az storage container create \
+              --name tfstate \
+              --account-name storageprojetocloud \
+              --auth-mode login \
+              --public-access off
+          else
+            echo "Container 'tfstate' já existe. A continuar..."
+          fi
+
       - name: Inicializar Terraform
         run: terraform init
         working-directory: ${{ env.TERRAFORM_DIR }}
 
-      - name: Importar recursos existentes (se ainda não existirem no state)
-        run: |
-          terraform import azurerm_resource_group.main \
-            /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud
-
-          terraform import azurerm_cognitive_account.translator \
-            /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.CognitiveServices/accounts/translator-service
-
-          terraform import azurerm_virtual_network.main \
-            /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/virtualNetworks/cloudvnet
-
-          terraform import azurerm_cosmosdb_account.main \
-            /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.DocumentDB/databaseAccounts/terraformcloudcosmosdb
-
-          terraform import azurerm_cosmosdb_sql_database.main \
-            /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.DocumentDB/databaseAccounts/terraformcloudcosmosdb/sqlDatabases/RedditApp
-
-          terraform import azurerm_cosmosdb_sql_container.main \
-            /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.DocumentDB/databaseAccounts/terraformcloudcosmosdb/sqlDatabases/RedditApp/containers/posts
-
-          terraform import azurerm_service_plan.main \
-            /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Web/serverFarms/asp-project-cloud
-
-          terraform import azurerm_storage_account.main \
-            /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Storage/storageAccounts/storageprojetocloud
-
-          terraform import azurerm_linux_web_app.web \
-            /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Web/sites/reddit-app
-
-          terraform import azurerm_linux_function_app.main \
-            /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Web/sites/propjetocloudfunctionapp
-
-          terraform import azurerm_subnet.app \
-            /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/virtualNetworks/cloudvnet/subnets/subnetappname
-
-          terraform import azurerm_subnet.priv \
-            /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/virtualNetworks/cloudvnet/subnets/subnetprivname
-
-          terraform import azurerm_private_endpoint.cosmos \
-            /subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/terraform-cloud/providers/Microsoft.Network/privateEndpoints/pe-cosmos
-  
+      - name: Plano Terraform
+        run: terraform plan
         working-directory: ${{ env.TERRAFORM_DIR }}
 
       - name: Validar Terraform
@@ -111,8 +104,7 @@ jobs:
 
       - name: Instalar dependências da Function
         run: |
-            pip install -r ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/requirements.txt
-
+          pip install -r ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/requirements.txt
 
       - name: Zip Function App
         run: |
@@ -192,6 +184,3 @@ jobs:
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           images: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}
-
-
-            

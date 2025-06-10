@@ -37,6 +37,15 @@ output "storage_connection_string" {
   sensitive = true
 }
 
+terraform {
+  backend "azurerm" {
+    resource_group_name   = "terraform-cloud"
+    storage_account_name  = "storageprojetocloud"
+    container_name        = "tfstate"
+    key                   = "terraform.tfstate"
+  }
+}
+
 provider "azurerm" {
   features {
     resource_group {
