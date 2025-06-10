@@ -72,6 +72,12 @@ jobs:
         run: terraform init
         working-directory: ${{ env.TERRAFORM_DIR }}
 
+      - name: Purgar conta Translator eliminada (se necessário)
+        run: |
+          az cognitiveservices account purge \
+            --name translator-service \
+            --resource-group terraform-cloud || echo "Nada para purgar"
+
       - name: Importar recursos se não existirem no estado
         run: |
           cd ${{ env.TERRAFORM_DIR }}
