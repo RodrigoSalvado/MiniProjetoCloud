@@ -98,18 +98,6 @@ resource "azurerm_subnet" "priv" {
   }
 }
 
-resource "azurerm_subnet_delegation" "priv_web_delegation" {
-  name                 = "functionapp-delegation"
-  subnet_id            = azurerm_subnet.priv.id
-  service_delegation {
-    name = "Microsoft.Web/serverFarms"
-    actions = [
-      "Microsoft.Network/virtualNetworks/subnets/action"
-    ]
-  }
-}
-
-
 resource "azurerm_public_ip" "nat" {
   name                = "nat-ip"
   location            = local.location
