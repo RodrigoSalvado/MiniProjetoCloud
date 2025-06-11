@@ -216,13 +216,6 @@ resource "azurerm_linux_function_app" "main" {
   site_config {
     always_on = true
 
-    ip_restriction {
-      service_tag = "AzureCloud"
-      name        = "Allow Azure Portal"
-      priority    = 100
-      action      = "Allow"
-    }
-
     application_insights_connection_string = azurerm_application_insights.main.connection_string
 
     application_stack {
@@ -245,12 +238,6 @@ resource "azurerm_linux_function_app" "main" {
     APPINSIGHTS_INSTRUMENTATIONKEY       = azurerm_application_insights.main.instrumentation_key
     WEBSITE_CORS_ALLOWED_ORIGINS         = "https://portal.azure.com"
   }
-}
-
-
-resource "azurerm_app_service_virtual_network_swift_connection" "func" {
-  app_service_id = azurerm_linux_function_app.main.id
-  subnet_id      = azurerm_subnet.app.id
 }
 
 resource "azurerm_private_endpoint" "cosmos" {
