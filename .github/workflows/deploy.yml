@@ -68,6 +68,20 @@ jobs:
           echo "ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .subscriptionId)" >> $GITHUB_ENV
           echo "ARM_TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r .tenantId)" >> $GITHUB_ENV
 
+      - name: Purge da conta translator-service (se necessário)
+        run: |
+          echo "🔎 A verificar se 'translator-service' está soft-deleted..."
+          EXISTS=$(az cognitiveservices account list-deleted --location northeurope --query "[?name=='translator-service'] | length(@)")
+          if [ "$EXISTS" -gt 0 ]; then
+            echo "🧹 A fazer purge da conta translator-service..."
+            az cognitiveservices account purge \
+              --location northeurope \
+              --name translator-service
+          else
+            echo "✅ Não há nada para purge."
+          fi
+
+
       - name: Inicializar Terraform com upgrade
         run: terraform init -upgrade
         working-directory: ${{ env.TERRAFORM_DIR }}
