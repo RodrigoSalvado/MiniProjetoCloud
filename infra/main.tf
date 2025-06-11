@@ -214,7 +214,9 @@ resource "azurerm_linux_function_app" "main" {
 
   site_config {
     always_on = true
+
     application_insights_connection_string = azurerm_application_insights.main.connection_string
+
     application_stack {
       python_version = "3.11"
     }
@@ -233,19 +235,14 @@ resource "azurerm_linux_function_app" "main" {
     TRANSLATOR_KEY                       = azurerm_cognitive_account.translator.primary_access_key
     CLIENT_ID                            = "bzG6zHjC23GSenSIXe0M-Q"
     APPINSIGHTS_INSTRUMENTATIONKEY       = azurerm_application_insights.main.instrumentation_key
+    WEBSITE_CORS_ALLOWED_ORIGINS         = "https://portal.azure.com"
+    WEBSITE_CORS_SUPPORT_CREDENTIALS     = "true"
   }
 }
 
 resource "azurerm_app_service_virtual_network_swift_connection" "func" {
   app_service_id = azurerm_linux_function_app.main.id
   subnet_id      = azurerm_subnet.app.id
-}
-
-resource "azurerm_function_app_cors_rule" "allow_portal" {
-  name                = azurerm_linux_function_app.main.name
-  resource_group_name = azurerm_resource_group.main.resource_group_name
-  allowed_origins     = ["https://portal.azure.com"]
-  support_credentials = true
 }
 
 resource "azurerm_private_endpoint" "cosmos" {
