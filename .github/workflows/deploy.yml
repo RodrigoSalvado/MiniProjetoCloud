@@ -195,25 +195,33 @@ jobs:
 
       - name: Forçar CORS na Function App
         run: |
-          # Remove todos os CORS atuais
-          az functionapp cors remove \
+          # Remove todas as origens actuais (caso exista alguma genérica tipo "*")
+          EXISTING_ORIGINS=$(az functionapp cors show \
             --name ${{ env.FUNCTIONAPP_NAME }} \
             --resource-group terraform-cloud \
-            --allowed-origins "*"
+            --query "allowedOrigins" -o tsv)
 
-          # Adiciona a origem correta
+          for origin in $EXISTING_ORIGINS; do
+            az functionapp cors remove \
+              --name ${{ env.FUNCTIONAPP_NAME }} \
+              --resource-group terraform-cloud \
+              --allowed-origins $origin
+          done
+
+          # Adiciona o portal Azure como origem permitida
           az functionapp cors add \
             --name ${{ env.FUNCTIONAPP_NAME }} \
             --resource-group terraform-cloud \
             --allowed-origins https://portal.azure.com
 
-          # Ativa suporte a credenciais (checkbox)
+          # Ativa suporte a credenciais (equivalente à checkbox)
           az resource update \
             --ids $(az functionapp show \
               --name ${{ env.FUNCTIONAPP_NAME }} \
               --resource-group terraform-cloud \
               --query id -o tsv) \
             --set properties.siteConfig.cors.supportCredentials=true
+
 
 
 
