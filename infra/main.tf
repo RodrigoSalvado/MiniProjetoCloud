@@ -113,6 +113,30 @@ resource "azurerm_subnet_nat_gateway_association" "app" {
   nat_gateway_id = azurerm_nat_gateway.main.id
 }
 
+resource "azurerm_network_security_group" "funcapp_nsg" {
+  name                = "nsg-funcapp"
+  location            = local.location
+  resource_group_name = azurerm_resource_group.main.name
+
+  security_rule {
+    name                       = "Allow-AzureFrontDoor-Backend"
+    priority                   = 100
+    direction                  = "Outbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "443"
+    source_address_prefix      = "*"
+    destination_address_prefix = "AzureFrontDoor.Backend"
+  }
+}
+
+resource "azurerm_subnet_network_security_group_association" "funcapp_nsg_assoc" {
+  subnet_id                 = azurerm_subnet.app.id
+  network_security_group_id = azurerm_network_security_group.funcapp_nsg.id
+}
+
+
 resource "azurerm_cosmosdb_account" "main" {
   name                = local.cosmos_name
   location            = local.location
