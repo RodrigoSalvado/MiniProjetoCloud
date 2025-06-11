@@ -173,6 +173,7 @@ jobs:
 
       - name: Instalar dependências da Function App
         run: |
+          sudo apt update && sudo apt install -y python3-distutils
           python -m venv .venv
           source .venv/bin/activate
           pip install --upgrade pip
