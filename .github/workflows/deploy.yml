@@ -195,15 +195,26 @@ jobs:
 
       - name: Forçar CORS na Function App
         run: |
+          # Remove todos os CORS atuais
+          az functionapp cors remove \
+            --name ${{ env.FUNCTIONAPP_NAME }} \
+            --resource-group terraform-cloud \
+            --allowed-origins "*"
+
+          # Adiciona a origem correta
           az functionapp cors add \
             --name ${{ env.FUNCTIONAPP_NAME }} \
             --resource-group terraform-cloud \
             --allowed-origins https://portal.azure.com
 
-          az functionapp config set \
-            --name ${{ env.FUNCTIONAPP_NAME }} \
-            --resource-group terraform-cloud \
-            --generic-configurations '{"cors":{"supportCredentials":true}}'
+          # Ativa suporte a credenciais (checkbox)
+          az resource update \
+            --ids $(az functionapp show \
+              --name ${{ env.FUNCTIONAPP_NAME }} \
+              --resource-group terraform-cloud \
+              --query id -o tsv) \
+            --set properties.siteConfig.cors.supportCredentials=true
+
 
 
       - name: Configurar Web App para usar imagem Docker

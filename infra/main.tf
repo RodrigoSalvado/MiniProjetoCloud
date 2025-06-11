@@ -235,8 +235,6 @@ resource "azurerm_linux_function_app" "main" {
     TRANSLATOR_KEY                       = azurerm_cognitive_account.translator.primary_access_key
     CLIENT_ID                            = "bzG6zHjC23GSenSIXe0M-Q"
     APPINSIGHTS_INSTRUMENTATIONKEY       = azurerm_application_insights.main.instrumentation_key
-    WEBSITE_CORS_ALLOWED_ORIGINS         = "https://portal.azure.com"
-    WEBSITE_CORS_SUPPORT_CREDENTIALS     = "true"
   }
 }
 
