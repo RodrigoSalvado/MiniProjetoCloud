@@ -173,11 +173,12 @@ jobs:
 
       - name: Instalar dependências da Function App
         run: |
-          sudo apt update && sudo apt install -y python3-distutils
           python -m venv .venv
           source .venv/bin/activate
+          python -m ensurepip --upgrade
           pip install --upgrade pip
           pip install -r ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/requirements.txt
+
 
       - name: Instalar Azure Functions Core Tools
         run: npm install -g azure-functions-core-tools@4 --unsafe-perm true
