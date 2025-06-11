@@ -197,6 +197,11 @@ resource "azurerm_linux_function_app" "main" {
     }
   }
 
+  cors {
+    allowed_origins = ["https://portal.azure.com"]
+  }
+
+
   app_settings = {
     COSMOS_CONTAINER                     = azurerm_cosmosdb_sql_container.main.name
     COSMOS_DATABASE                      = azurerm_cosmosdb_sql_database.main.name
@@ -212,6 +217,20 @@ resource "azurerm_linux_function_app" "main" {
     APPINSIGHTS_INSTRUMENTATIONKEY       = azurerm_application_insights.main.instrumentation_key
   }
 }
+
+resource "azurerm_app_service_access_restriction" "allow_portal" {
+  name                      = "allow-azurecloud"
+  priority                  = 100
+  action                    = "Allow"
+  service_tag               = "AzureCloud"
+  ip_address                = null
+  subnet_id                 = null
+  virtual_network_subnet_id = null
+  http_headers              = {}
+  target_resource_id        = azurerm_linux_function_app.main.id
+  scm_site                  = false
+}
+
 
 resource "azurerm_app_service_virtual_network_swift_connection" "func" {
   app_service_id = azurerm_linux_function_app.main.id
