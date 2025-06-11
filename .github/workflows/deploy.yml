@@ -79,10 +79,12 @@ jobs:
             echo "🧹 A fazer purge da conta translator-service..."
             az cognitiveservices account purge \
               --location northeurope \
+              --resource-group terraform-cloud \
               --name translator-service
           else
             echo "✅ Não há nada para purge."
           fi
+
 
 
 
