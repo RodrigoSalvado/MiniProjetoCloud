@@ -188,11 +188,10 @@ jobs:
       - name: Instalar Azure Functions Core Tools
         run: npm install -g azure-functions-core-tools@4 --unsafe-perm true
 
-      - name: Fazer deploy da Function App com build local
+      - name: Fazer deploy da Function App com build remoto
         run: |
           cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-          source ../.venv/bin/activate
-          func azure functionapp publish ${{ env.FUNCTIONAPP_NAME }} --build local --python
+          func azure functionapp publish ${{ env.FUNCTIONAPP_NAME }} --python
 
       - name: Configurar Web App para usar imagem Docker
         run: |
