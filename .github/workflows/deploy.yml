@@ -71,8 +71,11 @@ jobs:
       - name: Purge da conta translator-service (se necessário)
         run: |
           echo "🔎 A verificar se 'translator-service' está soft-deleted..."
-          EXISTS=$(az cognitiveservices account list-deleted --location northeurope --query "[?name=='translator-service'] | length(@)")
-          if [ "$EXISTS" -gt 0 ]; then
+
+          DELETED_ACCOUNTS=$(az cognitiveservices account list-deleted --query "[?name=='translator-service']")
+          COUNT=$(echo "$DELETED_ACCOUNTS" | jq 'length')
+
+          if [ "$COUNT" -gt 0 ]; then
             echo "🧹 A fazer purge da conta translator-service..."
             az cognitiveservices account purge \
               --location northeurope \
@@ -80,6 +83,7 @@ jobs:
           else
             echo "✅ Não há nada para purge."
           fi
+
 
 
       - name: Inicializar Terraform com upgrade
