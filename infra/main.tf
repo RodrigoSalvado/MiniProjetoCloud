@@ -191,16 +191,20 @@ resource "azurerm_linux_function_app" "main" {
 
   site_config {
     always_on = true
+
+    ip_restriction {
+      service_tag = "AzureCloud"
+      name        = "Allow Azure Portal"
+      priority    = 100
+      action      = "Allow"
+    }
+
     application_insights_connection_string = azurerm_application_insights.main.connection_string
+
     application_stack {
       python_version = "3.11"
     }
   }
-
-  cors {
-    allowed_origins = ["https://portal.azure.com"]
-  }
-
 
   app_settings = {
     COSMOS_CONTAINER                     = azurerm_cosmosdb_sql_container.main.name
@@ -215,8 +219,10 @@ resource "azurerm_linux_function_app" "main" {
     TRANSLATOR_KEY                       = azurerm_cognitive_account.translator.primary_access_key
     CLIENT_ID                            = "bzG6zHjC23GSenSIXe0M-Q"
     APPINSIGHTS_INSTRUMENTATIONKEY       = azurerm_application_insights.main.instrumentation_key
+    WEBSITE_CORS_ALLOWED_ORIGINS         = "https://portal.azure.com"
   }
 }
+
 
 resource "azurerm_app_service_access_restriction" "allow_portal" {
   name                      = "allow-azurecloud"
