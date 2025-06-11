@@ -271,6 +271,14 @@ resource "azurerm_private_dns_zone_virtual_network_link" "cosmos" {
   registration_enabled  = false
 }
 
+resource "azurerm_private_dns_a_record" "cosmos" {
+  name                = "terraformcloudcosmosdb"
+  zone_name           = azurerm_private_dns_zone.cosmos.name
+  resource_group_name = azurerm_resource_group.main.name
+  ttl                 = 300
+  records             = [azurerm_private_endpoint.cosmos.private_service_connection[0].private_ip_address]
+}
+
 output "functionapp_name" {
   value = azurerm_linux_function_app.main.name
 }
@@ -309,3 +317,4 @@ output "storage_connection_string" {
   value     = azurerm_storage_account.main.primary_connection_string
   sensitive = true
 }
+
