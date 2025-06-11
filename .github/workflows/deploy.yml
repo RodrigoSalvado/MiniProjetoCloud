@@ -171,13 +171,19 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
       - name: Instalar dependências da Function App
         run: |
-          python3.11 -m venv .venv
+          python -m venv .venv
           source .venv/bin/activate
           python -m ensurepip --upgrade
           pip install --upgrade pip
           pip install -r ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/requirements.txt
+
 
       - name: Instalar Azure Functions Core Tools
         run: npm install -g azure-functions-core-tools@4 --unsafe-perm true
