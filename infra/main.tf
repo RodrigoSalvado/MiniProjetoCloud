@@ -224,20 +224,6 @@ resource "azurerm_linux_function_app" "main" {
 }
 
 
-resource "azurerm_app_service_access_restriction" "allow_portal" {
-  name                      = "allow-azurecloud"
-  priority                  = 100
-  action                    = "Allow"
-  service_tag               = "AzureCloud"
-  ip_address                = null
-  subnet_id                 = null
-  virtual_network_subnet_id = null
-  http_headers              = {}
-  target_resource_id        = azurerm_linux_function_app.main.id
-  scm_site                  = false
-}
-
-
 resource "azurerm_app_service_virtual_network_swift_connection" "func" {
   app_service_id = azurerm_linux_function_app.main.id
   subnet_id      = azurerm_subnet.app.id
