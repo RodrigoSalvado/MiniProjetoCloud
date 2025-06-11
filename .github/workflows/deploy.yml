@@ -222,9 +222,6 @@ jobs:
               --query id -o tsv) \
             --set properties.siteConfig.cors.supportCredentials=true
 
-
-
-
       - name: Configurar Web App para usar imagem Docker
         run: |
           az webapp config container set \
