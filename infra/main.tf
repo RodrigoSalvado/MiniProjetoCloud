@@ -207,14 +207,15 @@ resource "azurerm_storage_account" "main" {
 
 resource "azurerm_linux_function_app" "main" {
   name                       = local.funcapp_name
-  location                   = local.location
+  location                   = azurerm_resource_group.main.location
   resource_group_name        = azurerm_resource_group.main.name
   service_plan_id            = azurerm_service_plan.main.id
   storage_account_name       = azurerm_storage_account.main.name
   storage_account_access_key = azurerm_storage_account.main.primary_access_key
 
   site_config {
-    always_on = true
+    always_on              = true
+    vnet_route_all_enabled = true
 
     application_insights_connection_string = azurerm_application_insights.main.connection_string
 
@@ -222,6 +223,8 @@ resource "azurerm_linux_function_app" "main" {
       python_version = "3.11"
     }
   }
+
+  virtual_network_subnet_id = azurerm_subnet.priv.id
 
   app_settings = {
     COSMOS_CONTAINER                     = azurerm_cosmosdb_sql_container.main.name
@@ -236,6 +239,10 @@ resource "azurerm_linux_function_app" "main" {
     TRANSLATOR_KEY                       = azurerm_cognitive_account.translator.primary_access_key
     CLIENT_ID                            = "bzG6zHjC23GSenSIXe0M-Q"
     APPINSIGHTS_INSTRUMENTATIONKEY       = azurerm_application_insights.main.instrumentation_key
+  }
+
+  identity {
+    type = "SystemAssigned"
   }
 }
 
