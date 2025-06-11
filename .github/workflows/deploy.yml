@@ -193,6 +193,19 @@ jobs:
           cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           func azure functionapp publish ${{ env.FUNCTIONAPP_NAME }} --python
 
+      - name: Forçar CORS na Function App
+        run: |
+          az functionapp cors add \
+            --name ${{ env.FUNCTIONAPP_NAME }} \
+            --resource-group terraform-cloud \
+            --allowed-origins https://portal.azure.com
+
+          az functionapp config set \
+            --name ${{ env.FUNCTIONAPP_NAME }} \
+            --resource-group terraform-cloud \
+            --generic-configurations '{"cors":{"supportCredentials":true}}'
+
+
       - name: Configurar Web App para usar imagem Docker
         run: |
           az webapp config container set \
